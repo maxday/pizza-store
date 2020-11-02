@@ -12,14 +12,10 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.bson.Document;
 
-
 import io.vertx.mutiny.core.Vertx;
 
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.ext.web.client.WebClient;
-
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @ApplicationScoped
 public class OrdersService {
@@ -28,6 +24,9 @@ public class OrdersService {
 
     @Inject
     Vertx vertx;
+
+    @Inject
+    GCPConfiguration configuration;
 
     @Inject
     ReactiveMongoClient mongoClient;
@@ -44,15 +43,9 @@ public class OrdersService {
     }
 
     public Uni<JsonObject> publishMessage(PubSubEvent event) {
-        System.out.println("ENTERING IN PUBLISH MESSAGE");
-        String prefix = "pubsub.googleapis.com";
-        String topicId = "projects/myeventpic/topics/pizza-orders";
-        String accessToken = "ya29.c.Kp0B4wf5KpHiDL7s9JM_9MOcrhZUv-fqRRDOT5cgSst7m3SlOJwcByWg43NGFyhaa_ttk2zMEXzNL3EJJ0UFVxfNNnladSh4vqY3hd_7Ak6fmHQ66hlJ6Ieq-uNwRowAuXhhp6BVII8B9XxWE1BQziaMGetVZZZ2OqVSl_V6Sur7VQPgXp5ysoR58kddmqOC5bXISePZy1zWXv8wfqz08g";
-
         PubSubEvent pubSubEvent = new PubSubEvent();
         PubSubMessage pubSubMessage = new PubSubMessage("ORDER_CREATED", event.getMessage().getData());
         pubSubEvent.setMessage(pubSubMessage);
-
 
         JsonObject obj = new JsonObject();
         JsonArray messages = new JsonArray();
@@ -63,15 +56,11 @@ public class OrdersService {
 
         System.out.println(obj);
 
-
-
-
-
         this.webclient = WebClient.create(vertx,
-                new WebClientOptions().setDefaultHost(prefix).setDefaultPort(443).setSsl(true));
+                new WebClientOptions().setDefaultHost(configuration.getApiHost()).setDefaultPort(443).setSsl(true));
         return this.webclient
-                .post("/v1/" + topicId + ":publish")
-                .bearerTokenAuthentication(accessToken)
+                .post(configuration.getPubsubTopicPublishUrl())
+                .bearerTokenAuthentication(configuration.getApiToken())
                 .sendJsonObject(obj)
                 .onItem().transform(resp -> {
                     System.out.println("resp");
