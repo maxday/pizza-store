@@ -7,16 +7,16 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
-@Path("/orders")
+@Path("/clientOrders")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class OrdersResource {
+public class ClientOrdersResource {
 
     @Inject
-    OrdersService ordersService;
+    ClientOrdersService clientOrdersService;
 
     @POST
-    public Uni<JsonObject> add(PubSubEvent event) {
-        return ordersService.add(event);
+    public Uni<JsonObject> add(PizzaOrder pizzaOrder) {
+        return clientOrdersService.createOrder(pizzaOrder);
     }
 }
