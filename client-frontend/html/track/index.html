@@ -43,8 +43,12 @@
       </div>
     </main>
     <script>
-      const orderId = location.search.replace('?uuid=', '');
-      document.getElementById("orderMessage").innerText = `Your order #${orderId}`;
+
+      const regexp = /\?uuid=(.*)&name=(.*)/
+      const matched = location.search.match(regexp);
+      const orderId = matched.length === 3 ? matched[1] : 'incorrect order';
+      const orderName = matched.length === 3 ? matched[2] : 'incorrect pizza name';
+      document.getElementById("orderMessage").innerText = `Your order #${orderId} (${orderName})`;
       const buttons = [
         "PIZZA_ORDER_PLACED", 
         "PIZZA_ORDER_ACCEPTED", 
@@ -53,12 +57,32 @@
         "PIZZA_ORDER_LEFT_STORE",
         "PIZZA_ORDER_DELIVERED"
       ];
-    
-      const source = new EventSource("/events");
+      const source = new EventSource('/events');
+      source.onopen = event => {
+        (async () => {
+          const pizza = {
+            uuid: orderId,
+            name: orderName, 
+          }
+
+          const response = await fetch('/orders', { 
+            method: 'POST', 
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(pizza)
+          });
+          console.log(response.status);
+        })().catch(err => {
+            console.error(err);
+        });
+      };
       source.onmessage = event => {
         buttons.forEach(e => document.getElementById(e).classList.remove('btn-success'));
         const data = JSON.parse(event.data);
-        document.getElementById(data.name).classList.add('btn-success')
+        if(document.getElementById(data.name)) {
+          document.getElementById(data.name).classList.add('btn-success');
+        }
       };
     </script>
   </body>

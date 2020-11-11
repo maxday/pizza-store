@@ -30,28 +30,28 @@
                 <strong class="d-block">Veggie</strong>
                 green peppers, onion, tomatoes, mushrooms and olives.
             </p>
-            <button type="button" class="btn btn-outline-primary lh-125" onclick="order()">Order</button>      
+            <button type="button" class="btn btn-outline-primary lh-125" onclick="order('Veggie')">Order</button>      
         </div>
         <div class="media pt-3 border-bottom border-gray">
             <p class="media-body pb-3 mb-0 small lh-125">
                 <strong class="d-block">Deluxe</strong>
                 pepperoni, Italian sausage, green peppers, mushrooms onions and cheese.
             </p>
-            <button type="button" class="btn btn-outline-primary lh-125" onclick="order()">Order</button>      
+            <button type="button" class="btn btn-outline-primary lh-125" onclick="order('Deluxe')">Order</button>      
         </div>
         <div class="media pt-3 border-bottom border-gray">
             <p class="media-body pb-3 mb-0 small lh-125">
                 <strong class="d-block">All Dressed</strong>
                 mozzarella cheese, pepperoni, red and green pepper and red onion.
             </p>
-            <button type="button" class="btn btn-outline-primary lh-125" onclick="order()">Order</button>      
+            <button type="button" class="btn btn-outline-primary lh-125" onclick="order('All Dressed')">Order</button>      
         </div>
         <div class="media pt-3 border-bottom border-gray">
             <p class="media-body pb-3 mb-0 small lh-125">
                 <strong class="d-block">Claritax</strong>
                 onion, mushrooms, prosciutto, mozzarella cheese and arugula.
             </p>
-            <button type="button" class="btn btn-outline-primary lh-125" onclick="order()">Order</button>      
+            <button type="button" class="btn btn-outline-primary lh-125" onclick="order('Claritax')">Order</button>      
         </div>
       </div>
       <div class="my-3 p-3 bg-white rounded box-shadow">
@@ -78,8 +78,8 @@
             const orderId = document.getElementById('order') ? document.getElementById('order').value : '';
             location.href = `track/?uuid=${orderId}`
         }
-        const order = () => {
-            location.href = `track/?uuid=${uuidv4()}`
+        const order = (pizzaName) => {
+            location.href = `track/?uuid=${uuidv4()}&name=${pizzaName}`
         }
     </script>
   </body>
