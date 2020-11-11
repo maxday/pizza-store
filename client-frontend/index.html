@@ -1,0 +1,91 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>BNTechDay - Pizza Store</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="./css/offcanvas.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <main role="main" class="container">
+      <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded box-shadow">
+        <img class="mr-3" src="./pics/pizza-logo.svg" alt="" width="48" height="48">
+        <div class="lh-100">
+          <h6 class="mb-0 text-white lh-100">TechDay Pizza Store</h6>
+          <small>Best remote pizza in town</small>
+        </div>
+      </div>
+      <div class="my-3 p-3 bg-white rounded box-shadow">
+        <h6 class="border-bottom border-gray pb-2 mb-0">Our delicious pizza</h6>
+        <div class="media pt-3 border-bottom border-gray">
+            <img data-src="holder.js/32x32?theme=thumb&bg=007bff&fg=007bff&size=1" alt="" class="mr-2 rounded">
+            <p class="media-body pb-3 mb-0 small lh-125">
+                <strong class="d-block">Veggie</strong>
+                green peppers, onion, tomatoes, mushrooms and olives.
+            </p>
+            <button type="button" class="btn btn-outline-primary lh-125" onclick="order()">Order</button>      
+        </div>
+        <div class="media pt-3 border-bottom border-gray">
+            <img data-src="holder.js/32x32?theme=thumb&bg=007bff&fg=007bff&size=1" alt="" class="mr-2 rounded">
+            <p class="media-body pb-3 mb-0 small lh-125">
+                <strong class="d-block">Deluxe</strong>
+                pepperoni, Italian sausage, green peppers, mushrooms onions and cheese.
+            </p>
+            <button type="button" class="btn btn-outline-primary lh-125" onclick="order()">Order</button>      
+        </div>
+        <div class="media pt-3 border-bottom border-gray">
+            <img data-src="holder.js/32x32?theme=thumb&bg=007bff&fg=007bff&size=1" alt="" class="mr-2 rounded">
+            <p class="media-body pb-3 mb-0 small lh-125">
+                <strong class="d-block">All Dressed</strong>
+                mozzarella cheese, pepperoni, red and green pepper and red onion.
+            </p>
+            <button type="button" class="btn btn-outline-primary lh-125" onclick="order()">Order</button>      
+        </div>
+        <div class="media pt-3 border-bottom border-gray">
+            <img data-src="holder.js/32x32?theme=thumb&bg=007bff&fg=007bff&size=1" alt="" class="mr-2 rounded">
+            <p class="media-body pb-3 mb-0 small lh-125">
+                <strong class="d-block">Claritax</strong>
+                onion, mushrooms, prosciutto, mozzarella cheese and arugula.
+            </p>
+            <button type="button" class="btn btn-outline-primary lh-125" onclick="order()">Order</button>      
+        </div>
+      </div>
+      <div class="my-3 p-3 bg-white rounded box-shadow">
+        <h6 class="border-bottom border-gray pb-2 mb-0">Track my order</h6>
+        <div class="media pt-3">
+          <img data-src="holder.js/32x32?theme=thumb&bg=007bff&fg=007bff&size=1" alt="" class="mr-2 rounded">
+          <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <input type="text" class="form-control" id="order" style="margin-right:10px;" placeholder="Order number">
+                <button type="button" class="btn btn-outline-primary purple" onclick="track()">Track</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+        const uuidv4 = () => {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            // thanks ! https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid
+        }
+        const track = () => {
+            const orderId = document.getElementById('order') ? document.getElementById('order').value : '';
+            location.href = `track.html?uuid=${orderId}`
+        }
+        const order = () => {
+            location.href = `track.html?uuid=${uuidv4()}`
+        }
+    </script>
+  </body>
+</html>

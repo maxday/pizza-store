@@ -1,0 +1,66 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>BNTechDay - Pizza Store</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="./css/offcanvas.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+
+    
+    <main role="main" class="container">
+      <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded box-shadow">
+        <img class="mr-3" src="./pics/pizza-logo.svg" alt="" width="48" height="48">
+        <div class="lh-100">
+          <h6 class="mb-0 text-white lh-100">TechDay Pizza Store</h6>
+          <small>Best remote pizza in town</small>
+        </div>
+      </div>
+      <div class="my-3 p-3 bg-white rounded box-shadow">
+        <h6 class="border-bottom border-gray pb-2 mb-0" id="orderMessage"></h6>
+        <div class="media pt-3 border-bottom border-gray">
+            <img data-src="holder.js/32x32?theme=thumb&bg=007bff&fg=007bff&size=1" alt="" class="mr-2 rounded">
+            <p class="media-body pb-3 mb-0 small lh-125">
+              <button id="PIZZA_ORDER_PLACED" type="button" class="btn btn-success lh-125">Placed</button> 
+              <button id="PIZZA_ORDER_ACCEPTED" type="button" class="btn btn-outline-disabled lh-125">Accepted</button>  
+              <button id="PIZZA_ORDER_PREPARED" type="button" class="btn btn-outline-disabled lh-125">Prepared</button>  
+              <button id="PIZZA_ORDER_BAKED" type="button" class="btn btn-outline-disabled lh-125">Baked</button>  
+              <button id="PIZZA_ORDER_LEFT_STORE" type="button" class="btn btn-outline-disabled lh-125">Left the store</button> 
+              <button id="PIZZA_ORDER_DELIVERED" type="button" class="btn btn-outline-disabled lh-125">Delivered !</button>  
+          </p>    
+        </div>
+        <small class="d-block text-right mt-3">
+          <a href="/">Home</a>
+        </small>
+      </div>
+    </main>
+    <script>
+      const orderId = location.search.replace('?uuid=', '');
+      document.getElementById("orderMessage").innerText = `Your order #${orderId}`;
+      const buttons = [
+        "PIZZA_ORDER_PLACED", 
+        "PIZZA_ORDER_ACCEPTED", 
+        "PIZZA_ORDER_PREPARED", 
+        "PIZZA_ORDER_BAKED", 
+        "PIZZA_ORDER_LEFT_STORE",
+        "PIZZA_ORDER_DELIVERED"
+      ];
+    
+      const source = new EventSource("http://localhost:3000/events");
+      source.onmessage = event => {
+        buttons.forEach(e => document.getElementById(e).classList.remove('btn-success'));
+        const data = JSON.parse(event.data);
+        document.getElementById(data.name).classList.add('btn-success')
+      };
+    </script>
+  </body>
+</html>
