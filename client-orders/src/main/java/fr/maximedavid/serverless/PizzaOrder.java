@@ -1,18 +1,16 @@
 package fr.maximedavid.serverless;
 
-import java.util.List;
-
 public class PizzaOrder {
 
     private String uuid;
-    private List<String> toppings;
+    private String name;
 
     public PizzaOrder() {
     }
 
-    public PizzaOrder(String uuid, List<String> toppings) {
+    public PizzaOrder(String uuid, String name) {
         this.uuid = uuid;
-        this.toppings = toppings;
+        this.name = name;
     }
 
     public String getUuid() {
@@ -23,11 +21,11 @@ public class PizzaOrder {
         this.uuid = uuid;
     }
 
-    public List<String> getToppings() {
-        return toppings;
+    public String getName() {
+        return name;
     }
 
-    public void setToppings(List<String> toppings) {
-        this.toppings = toppings;
+    public void setName(String name) {
+        this.name = name;
     }
 }

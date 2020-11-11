@@ -11,11 +11,7 @@ public class OrdersResourceTest {
 
     @Test
     public void testHelloEndpoint() {
-        given()
-          .when().get("/orders")
-          .then()
-             .statusCode(200)
-             .body(is("hello"));
+
     }
 
 }

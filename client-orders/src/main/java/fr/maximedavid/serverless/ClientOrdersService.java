@@ -1,16 +1,11 @@
 package fr.maximedavid.serverless;
 
-import io.quarkus.mongodb.reactive.ReactiveMongoClient;
-import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 
 import io.vertx.core.json.JsonObject;
-import org.bson.Document;
 
 import io.vertx.mutiny.core.Vertx;
 
@@ -28,24 +23,12 @@ public class ClientOrdersService {
     @Inject
     GCPConfiguration configuration;
 
-    @Inject
-    ReactiveMongoClient mongoClient;
-
     public Uni<JsonObject> createOrder(PizzaOrder pizzaOrder) {
-        Document document = new Document()
-                .append("uuid", pizzaOrder.getUuid())
-                .append("toppings", pizzaOrder.getToppings())
-                .append("status", "PIZZA_CREATED");
-        return getCollection().insertOne(document)
-                .flatMap(res -> publishMessage(pizzaOrder.getUuid()));
-    }
-
-    private ReactiveMongoCollection<Document> getCollection() {
-        return mongoClient.getDatabase("pizzaStore").getCollection("orders");
+        return publishMessage(pizzaOrder.getUuid());
     }
 
     public Uni<JsonObject> publishMessage(String uuid) {
-        PubSubEvent pubSubEvent = new PubSubEvent(uuid, "PIZZA_CREATED ");
+        PubSubEvent pubSubEvent = new PubSubEvent(uuid, "PIZZA_ORDER_REQUEST ");
         this.webclient = WebClient.create(vertx,
                 new WebClientOptions().setDefaultHost(configuration.getApiHost()).setDefaultPort(443).setSsl(true));
         return this.webclient
