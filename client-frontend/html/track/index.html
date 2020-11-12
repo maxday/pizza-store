@@ -78,6 +78,16 @@
           })().catch(err => {
               console.error(err);
           });
+        } else {
+          (async () => {
+            const response = await fetch(`/orders/${orderId}`);
+            console.log(response.status);
+            const eventRead = await response.text();
+            console.log(eventRead);
+            document.getElementById(eventRead).classList.add('btn-success');
+          })().catch(err => {
+              console.error(err);
+          });
         }
       };
       source.onmessage = event => {
