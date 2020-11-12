@@ -275,7 +275,7 @@ resource "google_cloud_run_service_iam_binding" "auth_manager_service" {
   ]
 }
 
-resource "google_cloud_run_domain_mapping" "default" {
+resource "google_cloud_run_domain_mapping" "pizza_maximedavid" {
   location = "us-central1"
   name     = "pizza.maximedavid.fr"
 
@@ -291,6 +291,10 @@ resource "google_cloud_run_domain_mapping" "default" {
   }
 }
 
-output "url" {
-  value = google_cloud_run_service.orders.status[0].url
+output "client_front_end_url" {
+  value = google_cloud_run_service.clientfrontend.status[0].url
+}
+
+output "manager_front_end_url" {
+  value = google_cloud_run_service.managerfrontend.status[0].url
 }

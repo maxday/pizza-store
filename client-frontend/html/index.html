@@ -76,7 +76,7 @@
         }
         const track = () => {
             const orderId = document.getElementById('order') ? document.getElementById('order').value : '';
-            location.href = `track/?uuid=${orderId}`
+            location.href = `track/?uuid=${orderId}&name=tracking`
         }
         const order = (pizzaName) => {
             location.href = `track/?uuid=${uuidv4()}&name=${pizzaName}`

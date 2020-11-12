@@ -5,7 +5,7 @@ variable "project_id" {
 
 variable "token" {
   type    = string
-  default = "ya29.A0AfH6SMC3TV_gXww53oKDBBTAxs8XDWmwSFtK9erkdJ-hWtqJz2RcG0mCmJ4cwlE3rcoC5MlsjuerTUZBTKfeSf1dF9hb2zSu2KxILai3_9DMmckoMXxS3fIsrxmxadL6xH86qMNUrzQZNLbrgo6wPKtEnYK9-CfOcsn-Oxu_C6CU"
+  default = "ya29.A0AfH6SMDVWCroNDLx3A_G0NqmesBHTqqXZzKLjG0QgcH3L-_Hstwldjt1z9-ooDiLbuyyKix79LTy_Td2VWBJJahw3w7lh7AEoBXFTm2ZzifFUdHBGj-O21NkWUSdTsZwzZZx0rT9F_JDIWucNODlyREfI3IroHj2uhpyX4IKj9DR"
 }
 
 variable "mongo_connexion_string" {
@@ -15,5 +15,5 @@ variable "mongo_connexion_string" {
 
 variable "pubsub_topic" {
     type  = string
-    default = "/v1/projects/${var.project_id}/topics/pizza-store:publish"
+    default = "/v1/projects/techday-pizza-store/topics/pizza-store:publish"
 }
