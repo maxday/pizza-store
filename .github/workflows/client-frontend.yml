@@ -16,5 +16,14 @@ jobs:
         uses: actions/checkout@v2
       - name: Build docker
         run: cd client-frontend && docker build -t gcr.io/myeventpic/client-frontend .
-      - name: Docker login
-        run: docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }} gcr.io
+      - name: Login to GCP
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_email: ${{ secrets.GCP_EMAIL }}
+          service_account_key: ${{ secrets.GCP_ACCOUNT_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT }}
+          export_default_credentials: true
+      - name: Push the Docker image to GCP
+        run: |
+          gcloud auth configure-docker --quiet
+          docker push gcr.io/myeventpic/client-frontend
