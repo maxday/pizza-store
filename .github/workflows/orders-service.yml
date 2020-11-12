@@ -14,8 +14,10 @@ jobs:
           error: 'No need to continue'
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Build native
+        run: cd orders-service && ./mvnw package -Pnative -Dquarkus.native.container-build=true 
       - name: Build docker
-        run: cd orders-service && docker build -t gcr.io/myeventpic/orders-service .
+        run: cd orders-service && docker build -f src/main/docker/Dockerfile.native -t gcr.io/myeventpic/orders-service .
       - name: Login to GCP
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
