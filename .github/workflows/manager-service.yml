@@ -27,4 +27,4 @@ jobs:
       - name: Push the Docker image to GCP
         run: |
           gcloud auth configure-docker --quiet
-          docker push gcr.io/myeventpic/manager-service .
+          docker push gcr.io/myeventpic/manager-service
