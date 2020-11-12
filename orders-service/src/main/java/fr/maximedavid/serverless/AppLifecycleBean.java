@@ -6,10 +6,10 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
-import io.vertx.mutiny.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.multipart.MultipartForm;
+import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.core.buffer.Buffer;
 import io.vertx.mutiny.ext.web.client.HttpResponse;
 import io.vertx.mutiny.ext.web.client.WebClient;
@@ -45,12 +45,12 @@ public class AppLifecycleBean {
     void onStart(@Observes StartupEvent ev) {
         LOGGER.info("The application is starting..." + configuration.getServiceAccount());
         try {
-            String jwt = generateJwt("237318786155-compute@developer.gserviceaccount.com", "https://www.googleapis.com/oauth2/v4/token", 3600);
+            String jwt = generateJwt(configuration.getServiceEmail(), configuration.getAudience(), configuration.getTokenExpiryLength());
             this.webclient = WebClient.create(vertx,
-                    new WebClientOptions().setDefaultHost("www.googleapis.com").setDefaultPort(443).setSsl(true));
+                    new WebClientOptions().setDefaultHost(configuration.getApiHost()).setDefaultPort(443).setSsl(true));
 
             HttpResponse<Buffer> res = this.webclient
-                    .post("/oauth2/v4/token")
+                    .post(configuration.getApiTokenPath())
                     .sendMultipartForm(io.vertx.mutiny.ext.web.multipart.MultipartForm.newInstance(
                             MultipartForm.create()
                                     .attribute("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
@@ -78,7 +78,7 @@ public class AppLifecycleBean {
         JWTCreator.Builder token = JWT.create()
                 .withIssuedAt(now)
                 .withExpiresAt(expTime)
-                .withClaim("scope", "https://www.googleapis.com/auth/pubsub")
+                .withClaim("scope", configuration.getTokenScope())
                 .withIssuer(saEmail)
                 .withAudience(audience)
                 .withSubject(saEmail)
@@ -93,5 +93,4 @@ public class AppLifecycleBean {
         Algorithm algorithm = Algorithm.RSA256(null, key);
         return token.sign(algorithm);
     }
-
 }

@@ -82,7 +82,7 @@ public class OrdersService {
         LOG.info("publishMessage");
         OutgoingPubSubEvent pubSubEvent = new OutgoingPubSubEvent(uuid, eventId);
         this.webclient = WebClient.create(vertx,
-                new WebClientOptions().setDefaultHost(configuration.getApiHost()).setDefaultPort(443).setSsl(true));
+                new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(443).setSsl(true));
         return this.webclient
                 .post(configuration.getPubsubTopicPublishUrl())
                 .bearerTokenAuthentication(tokenService.getAccessToken())
