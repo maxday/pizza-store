@@ -38,10 +38,10 @@ public class ClientOrdersService {
         return publishMessage(pizzaOrder.getUuid(), pizzaOrder.getName());
     }
 
-    public Uni<String> get(String uuid) {
+    public Uni<JsonObject> get(String uuid) {
         return getCollection()
                 .find(eq("uuid", uuid))
-                .map(doc -> doc.getString("uuid"))
+                .map(doc -> new JsonObject().put("uuid", doc.getString("uuid")))
                 .collectItems()
                 .first();
     }
