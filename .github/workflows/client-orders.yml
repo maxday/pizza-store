@@ -1,0 +1,30 @@
+name: 'Dockerize client-orders'
+on:
+  push
+
+jobs:
+  check-commit-message:
+    name: Check Commit Message
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Commit Type
+        uses: gsactions/commit-message-checker@v1
+        with:
+          pattern: '(.*)client-orders(.*)'
+          error: 'No need to continue'
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build native
+        run: cd client-orders && ./mvnw package -Pnative -Dquarkus.native.container-build=true 
+      - name: Build docker
+        run: cd client-orders && docker build -f src/main/docker/Dockerfile.native -t gcr.io/myeventpic/client-orders .
+      - name: Login to GCP
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          project_id: myeventpic
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+      - name: Push the Docker image to GCP
+        run: |
+          gcloud auth configure-docker --quiet
+          docker push gcr.io/myeventpic/client-orders .
