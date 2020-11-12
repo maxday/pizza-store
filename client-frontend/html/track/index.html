@@ -59,7 +59,7 @@
       ];
       const source = new EventSource(`/events/${orderId}`);
       source.onopen = event => {
-        if(orderId !== 'tracking') {
+        if(orderName !== 'tracking') {
           (async () => {
             const pizza = {
               uuid: orderId,
