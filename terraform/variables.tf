@@ -5,7 +5,7 @@ variable "project_id" {
 
 variable "token" {
   type    = string
-  default = "ya29.A0AfH6SMDfnx4dBj2buJ1YAj2ElGSM2bf6upGr8ep-CzyNZJl98WM7w6b7-jR5_zAQKFtPluA19pQ575rMjHBZltRWS8W4hvBn-6Gl8NEbomcNteZcgKzRKAde64a8GOAcpZQjSuJu6UgDHRB0JZa4_C8O5ujTT091A_l7csc4YWM5"
+  default = "ya29.A0AfH6SMAqtzqFkqzc_t9FTP29P-fzA_SLFD628q1qEDjrKRp3uDsIpQLGgIYeYag9DHZqNGEvrWm3Wxlq2ofmPsHOW2Yisql5kWN8Sll6hI7zbWIp8o4RRZQxQt8iptohzTxsL4Fr4zR1jofQQnopOj7ZnBhE3xSCGYPN5VohdJub"
 }
 
 variable "service_account" {

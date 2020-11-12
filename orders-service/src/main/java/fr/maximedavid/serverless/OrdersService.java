@@ -30,6 +30,9 @@ public class OrdersService {
     GCPConfiguration configuration;
 
     @Inject
+    TokenService tokenService;
+
+    @Inject
     ReactiveMongoClient mongoClient;
 
     private static final Logger LOG = Logger.getLogger(OrdersService.class);
@@ -82,7 +85,7 @@ public class OrdersService {
                 new WebClientOptions().setDefaultHost(configuration.getApiHost()).setDefaultPort(443).setSsl(true));
         return this.webclient
                 .post(configuration.getPubsubTopicPublishUrl())
-                .bearerTokenAuthentication(configuration.getApiToken())
+                .bearerTokenAuthentication(tokenService.getAccessToken())
                 .sendJsonObject(pubSubEvent)
                 .onItem().transform(resp -> {
                     if (resp.statusCode() == 200) {
