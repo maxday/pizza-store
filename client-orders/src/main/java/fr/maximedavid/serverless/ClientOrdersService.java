@@ -1,39 +1,18 @@
 package fr.maximedavid.serverless;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTCreator;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.google.auth.oauth2.ServiceAccountCredentials;
-
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-
-
 import io.quarkus.mongodb.reactive.ReactiveMongoClient;
 import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.swing.*;
 
 import io.vertx.core.json.JsonObject;
-
-import io.vertx.ext.web.multipart.MultipartForm;
 import io.vertx.mutiny.core.Vertx;
 
 import io.vertx.ext.web.client.WebClientOptions;
-import io.vertx.mutiny.core.buffer.Buffer;
-import io.vertx.mutiny.ext.web.client.HttpResponse;
 import io.vertx.mutiny.ext.web.client.WebClient;
-import io.vertx.reactivex.ext.auth.jwt.JWTAuth;
 import org.bson.Document;
-
-import java.io.*;
-import java.security.interfaces.RSAPrivateKey;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static com.mongodb.client.model.Filters.eq;
 
