@@ -7,4 +7,5 @@ public interface GCPConfiguration {
     String getApiHost();
     String getApiToken();
     String getPubsubTopicPublishUrl();
+    String getServiceAccount();
 }
