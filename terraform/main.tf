@@ -1,5 +1,5 @@
 provider "google" {
-  project = "myeventpic" # replace with your project ID
+  project = var.project_id # replace with your project ID
 }
 
 resource "google_project_service" "run" {
@@ -13,7 +13,7 @@ resource "google_cloud_run_service" "clientorders" {
   template {
     spec {
       containers {
-        image = "gcr.io/myeventpic/client-orders"
+        image = "gcr.io/${var.project_id}/client-orders"
         env {
           name = "QUARKUS_HTTP_PORT"
           value = 8080
@@ -45,7 +45,7 @@ resource "google_cloud_run_service" "orders" {
   template {
     spec {
       containers {
-        image = "gcr.io/myeventpic/orders-service"
+        image = "gcr.io/${var.project_id}/orders-service"
         env {
           name = "QUARKUS_HTTP_PORT"
           value = 8080
@@ -81,7 +81,7 @@ resource "google_cloud_run_service" "manager" {
   template {
     spec {
       containers {
-        image = "gcr.io/myeventpic/manager-service"
+        image = "gcr.io/${var.project_id}/manager-service"
         env {
           name = "QUARKUS_HTTP_PORT"
           value = 8080
@@ -117,7 +117,7 @@ resource "google_cloud_run_service" "clientfrontend" {
   template {
     spec {
       containers {
-        image = "gcr.io/myeventpic/client-frontend"
+        image = "gcr.io/${var.project_id}/client-frontend"
         env {
           name = "EVENTS_ENDPOINT"
           value = google_cloud_run_service.clientssehandler.status[0].url
@@ -136,7 +136,7 @@ resource "google_cloud_run_service" "clientfrontend" {
   }
 
   metadata {
-    namespace = "myeventpic"
+    namespace = var.project_id
   }
 
   depends_on = [google_project_service.run]
@@ -149,7 +149,7 @@ resource "google_cloud_run_service" "managerfrontend" {
   template {
     spec {
       containers {
-        image = "gcr.io/myeventpic/manager-frontend"
+        image = "gcr.io/${var.project_id}/manager-frontend"
         env {
           name = "ORDERS_ENDPOINT"
           value = google_cloud_run_service.manager.status[0].url
@@ -164,7 +164,7 @@ resource "google_cloud_run_service" "managerfrontend" {
   }
 
   metadata {
-    namespace = "myeventpic"
+    namespace = var.project_id
   }
 
   depends_on = [google_project_service.run]
@@ -177,7 +177,7 @@ resource "google_cloud_run_service" "clientssehandler" {
   template {
     spec {
       containers {
-        image = "gcr.io/myeventpic/client-sse-handler"
+        image = "gcr.io/${var.project_id}/client-sse-handler"
       }
     }
   }
@@ -188,7 +188,7 @@ resource "google_cloud_run_service" "clientssehandler" {
   }
 
   metadata {
-    namespace = "myeventpic"
+    namespace = var.project_id
   }
 
   depends_on = [google_project_service.run]
@@ -280,7 +280,7 @@ resource "google_cloud_run_domain_mapping" "default" {
   name     = "pizza.maximedavid.fr"
 
   metadata {
-    namespace = "myeventpic"
+    namespace = var.project_id
     annotations = {
       "run.googleapis.com/launch-stage" : "BETA"
     }

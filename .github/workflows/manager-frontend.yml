@@ -15,14 +15,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build docker
-        run: cd manager-frontend && docker build -t gcr.io/myeventpic/manager-frontend .
+        run: cd manager-frontend && docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/manager-frontend .
       - name: Login to GCP
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
-          project_id: myeventpic
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
       - name: Push the Docker image to GCP
         run: |
           gcloud auth configure-docker --quiet
-          docker push gcr.io/myeventpic/manager-frontend
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/manager-frontend

@@ -1,3 +1,8 @@
+variable "project_id" {
+    type  = string
+    default = "techday-pizza-store"
+}
+
 variable "token" {
   type    = string
   default = "ya29.A0AfH6SMC3TV_gXww53oKDBBTAxs8XDWmwSFtK9erkdJ-hWtqJz2RcG0mCmJ4cwlE3rcoC5MlsjuerTUZBTKfeSf1dF9hb2zSu2KxILai3_9DMmckoMXxS3fIsrxmxadL6xH86qMNUrzQZNLbrgo6wPKtEnYK9-CfOcsn-Oxu_C6CU"
@@ -10,5 +15,5 @@ variable "mongo_connexion_string" {
 
 variable "pubsub_topic" {
     type  = string
-    default = "/v1/projects/myeventpic/topics/pizza-store:publish"
+    default = "/v1/projects/${var.project_id}/topics/pizza-store:publish"
 }

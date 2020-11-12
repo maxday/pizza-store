@@ -1,6 +1,3 @@
-# mvn package -Pnative -Dquarkus.native.container-build=true
-# docker build -f src/main/docker/Dockerfile.native -t gcr.io/myeventpic/orders-service .
-
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.1
 WORKDIR /work/
 RUN chown 1001 /work \
