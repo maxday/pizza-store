@@ -29,8 +29,8 @@
         <h6 class="border-bottom border-gray pb-2 mb-0" id="orderMessage"></h6>
         <div class="media pt-3 border-bottom border-gray">
             <p class="media-body pb-3 mb-0 small lh-125">
-              <button id="PIZZA_ORDER_PLACED" type="button" class="btn btn-success lh-125">Placed</button> 
-              <button id="PIZZA_ORDER_ACCEPTED" type="button" class="btn btn-outline-disabled lh-125">Accepted</button>  
+              <button id="PIZZA_ORDER_REQUEST" type="button" class="btn btn-outline-disabled lh-125">Placed</button> 
+              <button id="PIZZA_ORDERED" type="button" class="btn btn-outline-disabled lh-125">Accepted</button>  
               <button id="PIZZA_ORDER_PREPARED" type="button" class="btn btn-outline-disabled lh-125">Prepared</button>  
               <button id="PIZZA_ORDER_BAKED" type="button" class="btn btn-outline-disabled lh-125">Baked</button>  
               <button id="PIZZA_ORDER_LEFT_STORE" type="button" class="btn btn-outline-disabled lh-125">Left the store</button> 
@@ -50,14 +50,14 @@
       const orderName = matched.length === 3 ? matched[2] : 'incorrect pizza name';
       document.getElementById("orderMessage").innerText = `Your order #${orderId} (${orderName})`;
       const buttons = [
-        "PIZZA_ORDER_PLACED", 
-        "PIZZA_ORDER_ACCEPTED", 
+        "PIZZA_ORDER_REQUEST", 
+        "PIZZA_ORDERED", 
         "PIZZA_ORDER_PREPARED", 
         "PIZZA_ORDER_BAKED", 
         "PIZZA_ORDER_LEFT_STORE",
         "PIZZA_ORDER_DELIVERED"
       ];
-      const source = new EventSource('/events');
+      const source = new EventSource(`/events/${orderId}`);
       source.onopen = event => {
         (async () => {
           const pizza = {
@@ -79,6 +79,8 @@
       };
       source.onmessage = event => {
         buttons.forEach(e => document.getElementById(e).classList.remove('btn-success'));
+        console.log(event);
+        console.log(event.data);
         const data = JSON.parse(event.data);
         if(document.getElementById(data.name)) {
           document.getElementById(data.name).classList.add('btn-success');

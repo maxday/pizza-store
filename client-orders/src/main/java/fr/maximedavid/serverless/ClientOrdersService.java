@@ -28,7 +28,8 @@ public class ClientOrdersService {
     }
 
     public Uni<JsonObject> publishMessage(String uuid) {
-        PubSubEvent pubSubEvent = new PubSubEvent(uuid, "PIZZA_ORDER_REQUEST ");
+        PubSubEvent pubSubEvent = new PubSubEvent(uuid, "PIZZA_ORDER_REQUEST");
+        System.out.println(pubSubEvent);
         this.webclient = WebClient.create(vertx,
                 new WebClientOptions().setDefaultHost(configuration.getApiHost()).setDefaultPort(443).setSsl(true));
         return this.webclient
