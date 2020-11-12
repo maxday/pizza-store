@@ -37,31 +37,37 @@ public class OrdersService {
     public Uni<JsonObject> receive(IncomingPubSubEvent pubSubEvent) {
         String eventId = pubSubEvent.getMessage().getAttributes().getEventId();
         String uuid = pubSubEvent.getMessage().getAttributes().getUuid();
-        String data = pubSubEvent.getMessage().getData();
+        String name = pubSubEvent.getMessage().getAttributes().getName();
         LOG.info("RECEIVED UUID = " + uuid + " AND EVENTID = " + eventId);
+
         if("PIZZA_ORDER_REQUEST".equals(eventId)) {
             LOG.info("in switch for PIZZA_ORDER_REQUEST");
-            return handlePizzaCreationRequest(uuid, data);
-        } else if("PIZZA_BAKING_REQUEST".equals(eventId)) {
-            return handlePizzaBakingRequest(uuid);
+            return handlePizzaCreationRequest(uuid, name);
+        } else if ("PIZZA_PREPARED_REQUEST".equals(eventId)
+                || "PIZZA_BAKED_REQUEST".equals(eventId)
+                || "PIZZA_LEFT_STORE_REQUEST".equals(eventId)
+                || "PIZZA_DELIVERED_REQUEST".equals(eventId)) {
+            return handlePizzaChangeStatusRequest(uuid, eventId);
         } else {
             return Uni.createFrom().nullItem();
         }
     }
 
-    private Uni<JsonObject> handlePizzaCreationRequest(String uuid, String data) {
+    private Uni<JsonObject> handlePizzaCreationRequest(String uuid, String name) {
         LOG.info("handlePizzaCreationRequest uuid = " + uuid);
-        LOG.info("handlePizzaCreationRequest data = " + data);
+        LOG.info("handlePizzaCreationRequest name = " + name);
         Document document = new Document()
                 .append("uuid", uuid)
-                .append("toppings", data)
+                .append("name", name)
                 .append("status", "PIZZA_ORDERED");
         return getCollection().insertOne(document).flatMap(res -> publishMessage(uuid, "PIZZA_ORDERED"));
     }
 
-    private Uni<JsonObject> handlePizzaBakingRequest(String uuid) {
-        LOG.info("handlePizzaBakingRequest uuid = " + uuid);
-        return getCollection().updateOne(eq("uuid", uuid), new Document("$set", new Document("status", "PIZZA_BAKED"))).flatMap(res -> publishMessage(uuid, "PIZZA_BAKED"));
+    private Uni<JsonObject> handlePizzaChangeStatusRequest(String uuid, String eventId) {
+        LOG.info("handlePizzaChangeStatusRequest uuid = " + uuid);
+        LOG.info("handlePizzaChangeStatusRequest eventId = " + eventId);
+        String newEventId = eventId.replace("_REQUEST", "");
+        return getCollection().updateOne(eq("uuid", uuid), new Document("$set", new Document("status", newEventId))).flatMap(res -> publishMessage(uuid, newEventId));
     }
 
 

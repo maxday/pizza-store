@@ -31,10 +31,10 @@
             <p class="media-body pb-3 mb-0 small lh-125">
               <button id="PIZZA_ORDER_REQUEST" type="button" class="btn btn-outline-disabled lh-125">Placed</button> 
               <button id="PIZZA_ORDERED" type="button" class="btn btn-outline-disabled lh-125">Accepted</button>  
-              <button id="PIZZA_ORDER_PREPARED" type="button" class="btn btn-outline-disabled lh-125">Prepared</button>  
-              <button id="PIZZA_ORDER_BAKED" type="button" class="btn btn-outline-disabled lh-125">Baked</button>  
-              <button id="PIZZA_ORDER_LEFT_STORE" type="button" class="btn btn-outline-disabled lh-125">Left the store</button> 
-              <button id="PIZZA_ORDER_DELIVERED" type="button" class="btn btn-outline-disabled lh-125">Delivered !</button>  
+              <button id="PIZZA_PREPARED" type="button" class="btn btn-outline-disabled lh-125">Prepared</button>  
+              <button id="PIZZA_BAKED" type="button" class="btn btn-outline-disabled lh-125">Baked</button>  
+              <button id="PIZZA_LEFT_STORE" type="button" class="btn btn-outline-disabled lh-125">Left the store</button> 
+              <button id="PIZZA_DELIVERED" type="button" class="btn btn-outline-disabled lh-125">Delivered !</button>  
           </p>    
         </div>
         <small class="d-block text-right mt-3">
@@ -52,10 +52,10 @@
       const buttons = [
         "PIZZA_ORDER_REQUEST", 
         "PIZZA_ORDERED", 
-        "PIZZA_ORDER_PREPARED", 
-        "PIZZA_ORDER_BAKED", 
-        "PIZZA_ORDER_LEFT_STORE",
-        "PIZZA_ORDER_DELIVERED"
+        "PIZZA_PREPARED", 
+        "PIZZA_BAKED", 
+        "PIZZA_LEFT_STORE",
+        "PIZZA_DELIVERED"
       ];
       const source = new EventSource(`/events/${orderId}`);
       source.onopen = event => {

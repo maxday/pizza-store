@@ -7,7 +7,7 @@ import java.util.Base64;
 
 public class PubSubEvent extends JsonObject {
 
-    public PubSubEvent(String uuid, String eventId, String name) {
+    public PubSubEvent(String uuid, String eventId) {
         JsonArray messages = new JsonArray();
         this.put("messages", messages);
         JsonObject item0 = new JsonObject();
@@ -16,7 +16,6 @@ public class PubSubEvent extends JsonObject {
         JsonObject attributes = new JsonObject();
         attributes.put("uuid", uuid);
         attributes.put("eventId", eventId);
-        attributes.put("name", name);
         item0.put("attributes", attributes);
     }
 

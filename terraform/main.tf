@@ -20,11 +20,11 @@ resource "google_cloud_run_service" "clientorders" {
         }
         env {
           name = "GCP_PUBSUB_TOPIC_PUBLISH_URL"
-          value = "/v1/projects/myeventpic/topics/pizza-store:publish"
+          value = var.pubsub_topic
         }
         env {
           name = "GCP_API_TOKEN"
-          value = "ya29.A0AfH6SMCkj-1Rk6bb2Sc6r5Z2Ui6TyolyooeJSjQjPLTNseM7xrsu5yoHOvFu4_b89853cYY62r7F0E0lTB-9h8fjXI76Y4sgG2KOxrzV-sFwKI-1Z6IdiJMuKKIV7t8Mx3DmlNl8q4hwt_dL7cs4MmThXK3MwSw2IjEJiz_rbClh"
+          value = var.token
         }
       }
     }
@@ -45,22 +45,58 @@ resource "google_cloud_run_service" "orders" {
   template {
     spec {
       containers {
-        image = "gcr.io/myeventpic/quarkus/orders-service@sha256:08528b96d160641ef4820e364495377f8ac7024e2af610d6a00cf0b2d766dd6c"
+        image = "gcr.io/myeventpic/orders-service"
         env {
           name = "QUARKUS_HTTP_PORT"
           value = 8080
         }
         env {
           name = "QUARKUS_MONGODB_CONNECTION_STRING"
-          value = "mongodb://googleCloundRunUser:25yjZFC0MkgF2iXv@article-shard-00-00.smmzv.mongodb.net:27017,article-shard-00-01.smmzv.mongodb.net:27017,article-shard-00-02.smmzv.mongodb.net:27017/pizzaOrder?ssl=true&replicaSet=atlas-pf7b4z-shard-0&authSource=admin&retryWrites=true&w=majority"
+          value = var.mongo_connexion_string
         }
         env {
           name = "GCP_PUBSUB_TOPIC_PUBLISH_URL"
-          value = "/v1/projects/myeventpic/topics/pizza-store:publish"
+          value = var.pubsub_topic
         }
         env {
           name = "GCP_API_TOKEN"
-          value = "ya29.A0AfH6SMCkj-1Rk6bb2Sc6r5Z2Ui6TyolyooeJSjQjPLTNseM7xrsu5yoHOvFu4_b89853cYY62r7F0E0lTB-9h8fjXI76Y4sgG2KOxrzV-sFwKI-1Z6IdiJMuKKIV7t8Mx3DmlNl8q4hwt_dL7cs4MmThXK3MwSw2IjEJiz_rbClh"
+          value = var.token
+        }
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+
+  depends_on = [google_project_service.run]
+}
+
+resource "google_cloud_run_service" "manager" {
+  name     = "manager"
+  location = "us-central1"
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/myeventpic/manager-service"
+        env {
+          name = "QUARKUS_HTTP_PORT"
+          value = 8080
+        }
+        env {
+          name = "QUARKUS_MONGODB_CONNECTION_STRING"
+          value = var.mongo_connexion_string
+        }
+        env {
+          name = "GCP_PUBSUB_TOPIC_PUBLISH_URL"
+          value = var.pubsub_topic
+        }
+        env {
+          name = "GCP_API_TOKEN"
+          value = var.token
         }
       }
     }
@@ -89,6 +125,34 @@ resource "google_cloud_run_service" "clientfrontend" {
         env {
           name = "ORDERS_ENDPOINT"
           value = google_cloud_run_service.clientorders.status[0].url
+        }
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+
+  metadata {
+    namespace = "myeventpic"
+  }
+
+  depends_on = [google_project_service.run]
+}
+
+resource "google_cloud_run_service" "managerfrontend" {
+  name     = "managerfrontend"
+  location = "us-central1"
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/myeventpic/manager-frontend"
+        env {
+          name = "ORDERS_ENDPOINT"
+          value = google_cloud_run_service.manager.status[0].url
         }
       }
     }
@@ -148,7 +212,7 @@ resource "google_pubsub_subscription" "pizza-store-push-sub" {
     push_endpoint = "${google_cloud_run_service.orders.status[0].url}/orders"
   }
 
-  filter = "attributes.eventId = \"PIZZA_ORDER_REQUEST\" OR attributes.eventId = \"PIZZA_BAKING_REQUEST\""
+  filter = "attributes.eventId = \"PIZZA_ORDER_REQUEST\" OR attributes.eventId = \"PIZZA_PREPARED_REQUEST\" OR attributes.eventId = \"PIZZA_BAKED_REQUEST\" OR attributes.eventId = \"PIZZA_LEFT_STORE_REQUEST\" OR attributes.eventId = \"PIZZA_DELIVERED_REQUEST\""
 }
 
 resource "google_cloud_run_service_iam_binding" "auth_orders" {
@@ -171,6 +235,16 @@ resource "google_cloud_run_service_iam_binding" "auth_client_frontend" {
   ]
 }
 
+resource "google_cloud_run_service_iam_binding" "auth_manager_frontend" {
+  location = google_cloud_run_service.managerfrontend.location
+  project = google_cloud_run_service.managerfrontend.project
+  service = google_cloud_run_service.managerfrontend.name
+  role = "roles/run.invoker"
+  members = [
+    "allUsers",
+  ]
+}
+
 resource "google_cloud_run_service_iam_binding" "auth_client_orders" {
   location    = google_cloud_run_service.clientorders.location
   project     = google_cloud_run_service.clientorders.project
@@ -185,6 +259,16 @@ resource "google_cloud_run_service_iam_binding" "auth_client_sse_handler" {
   location    = google_cloud_run_service.clientssehandler.location
   project     = google_cloud_run_service.clientssehandler.project
   service     = google_cloud_run_service.clientssehandler.name
+  role = "roles/run.invoker"
+  members = [
+    "allUsers",
+  ]
+}
+
+resource "google_cloud_run_service_iam_binding" "auth_manager_service" {
+  location    = google_cloud_run_service.manager.location
+  project     = google_cloud_run_service.manager.project
+  service     = google_cloud_run_service.manager.name
   role = "roles/run.invoker"
   members = [
     "allUsers",

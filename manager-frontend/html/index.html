@@ -1,0 +1,91 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>BNTechDay - Pizza Store</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="./css/offcanvas.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <main role="main" class="container">
+      <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded box-shadow">
+        <img class="mr-3" src="./pics/pizza-logo.svg" alt="" width="48" height="48">
+        <div class="lh-100">
+          <h6 class="mb-0 text-white lh-100">TechDay Pizza Store</h6>
+          <small>Best remote pizza in town</small>
+        </div>
+      </div>
+      <div class="my-3 p-3 bg-white rounded box-shadow">
+        <h6 class="border-bottom border-gray pb-2 mb-0">Current orders</h6>
+        <div id="toClone" class="media pt-3 border-bottom border-gray hidden">
+          <p class="media-body pb-3 mb-0 small lh-125">
+              <strong class="d-block"><span class="pizzaOrderID">OrderId</span></strong>
+              <span class="pizzaDetails">details</span>
+          </p>
+          <button type="button" class="btn btn-outline-primary lh-125 prepared" onclick="markAs(this, 'PIZZA_PREPARED_REQUEST')">Mark as PREPARED</button>&nbsp;
+          <button type="button" class="btn btn-outline-primary lh-125" onclick="markAs(this, 'PIZZA_BAKED_REQUEST')">Mark as BAKED</button>&nbsp;
+          <button type="button" class="btn btn-outline-primary lh-125" onclick="markAs(this, 'PIZZA_LEFT_STORE_REQUEST')">Mark as LEFT_STORE</button>&nbsp;
+          <button type="button" class="btn btn-outline-primary lh-125" onclick="markAs(this, 'PIZZA_DELIVERED_REQUEST')">Mark as DELIVERED</button>&nbsp;
+        </div>
+        <span id="orderList"></span>
+      </div>
+    </main>
+    <script>
+        
+        const cloneLine = (pizza, parentElem) => {
+          const clone = document.getElementById('toClone').cloneNode(true);
+          clone.id = pizza.uuid;
+          clone.classList.remove('hidden');
+          clone.getElementsByClassName('pizzaOrderID')[0].innerText = `Order #${pizza.uuid}`;
+          clone.getElementsByClassName('pizzaDetails')[0].innerText = pizza.name;
+          [...clone.getElementsByTagName('button')].forEach(button => button.setAttribute('data-uuid', pizza.uuid));
+          parentElem.appendChild(clone);
+        }
+
+        const fetchOrders = () => {
+          (async () => {
+            const response = await fetch('/orders', { 
+              method: 'GET', 
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            const result = await response.json();
+            result.forEach(e => cloneLine(e, document.getElementById('orderList')));
+          })().catch(err => {
+            console.error(err);
+          });
+        }
+
+        const markAs = (elem, status) => {
+          console.log('MARKING' + elem.getAttribute('data-uuid') + " AS " + status);
+          const item = {
+              eventId: status,
+              uuid: elem.getAttribute('data-uuid')
+          };
+          console.log(item);
+          (async () => {
+            const response = await fetch('/orders', { 
+              method: 'PUT', 
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(item)
+            });
+            console.log(response.status);
+          })().catch(err => {
+            console.error(err);
+          });
+        }
+        fetchOrders();
+    </script>
+  </body>
+</html>

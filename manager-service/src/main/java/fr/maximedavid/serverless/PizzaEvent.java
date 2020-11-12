@@ -1,19 +1,18 @@
 package fr.maximedavid.serverless;
 
-public class Attributes {
-    private String eventId;
+public class PizzaEvent {
+
     private String uuid;
+    private String eventId;
     private String name;
 
-    public Attributes() {
+    public PizzaEvent() {
     }
 
-    public String getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(String eventId) {
+    public PizzaEvent(String uuid, String eventId, String name) {
+        this.uuid = uuid;
         this.eventId = eventId;
+        this.name = name;
     }
 
     public String getUuid() {
@@ -22,6 +21,14 @@ public class Attributes {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
     }
 
     public String getName() {

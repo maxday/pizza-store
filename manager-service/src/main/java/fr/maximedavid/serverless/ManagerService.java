@@ -5,15 +5,21 @@ import io.smallrye.mutiny.Uni;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import io.quarkus.mongodb.reactive.ReactiveMongoClient;
+import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
+
 import io.vertx.core.json.JsonObject;
 
 import io.vertx.mutiny.core.Vertx;
 
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.ext.web.client.WebClient;
+import org.bson.Document;
+
+import java.util.List;
 
 @ApplicationScoped
-public class ClientOrdersService {
+public class ManagerService {
 
     private WebClient webclient;
 
@@ -21,14 +27,17 @@ public class ClientOrdersService {
     Vertx vertx;
 
     @Inject
+    ReactiveMongoClient mongoClient;
+
+    @Inject
     GCPConfiguration configuration;
 
-    public Uni<JsonObject> createOrder(PizzaOrder pizzaOrder) {
-        return publishMessage(pizzaOrder.getUuid(), pizzaOrder.getName());
+    public Uni<JsonObject> setStatus(PizzaEvent pizzaEvent) {
+        return publishMessage(pizzaEvent.getUuid(), pizzaEvent.getEventId());
     }
 
-    public Uni<JsonObject> publishMessage(String uuid, String name) {
-        PubSubEvent pubSubEvent = new PubSubEvent(uuid, "PIZZA_ORDER_REQUEST", name);
+    public Uni<JsonObject> publishMessage(String uuid, String eventId) {
+        PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventId);
         System.out.println(pubSubEvent);
         this.webclient = WebClient.create(vertx,
                 new WebClientOptions().setDefaultHost(configuration.getApiHost()).setDefaultPort(443).setSsl(true));
@@ -49,5 +58,21 @@ public class ClientOrdersService {
                     }
                 });
     }
+
+    public Uni<List<PizzaEvent>> listOrders() {
+        return getCollection().find()
+                .map(doc -> {
+                    PizzaEvent pizzaEvent = new PizzaEvent();
+                    pizzaEvent.setUuid(doc.getString("uuid"));
+                    pizzaEvent.setName(doc.getString("name"));
+                    pizzaEvent.setEventId(doc.getString("status"));
+                    return pizzaEvent;
+                }).collectItems().asList();
+    }
+
+    private ReactiveMongoCollection<Document> getCollection() {
+        return mongoClient.getDatabase("pizzaStore").getCollection("orders");
+    }
+
 
 }
