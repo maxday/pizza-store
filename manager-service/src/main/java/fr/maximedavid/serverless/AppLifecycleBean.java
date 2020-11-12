@@ -45,10 +45,10 @@ public class AppLifecycleBean {
     void onStart(@Observes StartupEvent ev) {
         LOGGER.info("The application is starting..." + configuration.getServiceAccount());
         try {
-            String jwt = generateJwt(configuration.getServiceEmail(),
-                    configuration.getAudience(), configuration.getTokenExpiryLength());
+            String jwt = generateJwt(configuration.getServiceEmail(), configuration.getAudience(), configuration.getTokenExpiryLength());
             this.webclient = WebClient.create(vertx,
                     new WebClientOptions().setDefaultHost(configuration.getApiHost()).setDefaultPort(443).setSsl(true));
+
             HttpResponse<Buffer> res = this.webclient
                     .post(configuration.getApiTokenPath())
                     .sendMultipartForm(io.vertx.mutiny.ext.web.multipart.MultipartForm.newInstance(
@@ -93,5 +93,4 @@ public class AppLifecycleBean {
         Algorithm algorithm = Algorithm.RSA256(null, key);
         return token.sign(algorithm);
     }
-
 }
