@@ -99,8 +99,8 @@ resource "google_cloud_run_service" "manager" {
           value = var.pubsub_topic
         }
         env {
-          name = "GCP_API_TOKEN"
-          value = var.token
+          name = "GCP_SERVICE_ACCOUNT"
+          value = var.service_account
         }
       }
     }

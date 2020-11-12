@@ -27,6 +27,9 @@ public class ManagerService {
     Vertx vertx;
 
     @Inject
+    TokenService tokenService;
+
+    @Inject
     ReactiveMongoClient mongoClient;
 
     @Inject
@@ -43,7 +46,7 @@ public class ManagerService {
                 new WebClientOptions().setDefaultHost(configuration.getApiHost()).setDefaultPort(443).setSsl(true));
         return this.webclient
                 .post(configuration.getPubsubTopicPublishUrl())
-                .bearerTokenAuthentication(configuration.getApiToken())
+                .bearerTokenAuthentication(tokenService.getAccessToken())
                 .sendJsonObject(pubSubEvent)
                 .onItem().transform(resp -> {
                     System.out.println("resp");
