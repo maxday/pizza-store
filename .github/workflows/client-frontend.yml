@@ -14,3 +14,5 @@ jobs:
           error: 'No need to continue'
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Build docker
+        run: cd client-frontend && docker build -t gcr.io/myeventpic/client-frontend .
