@@ -1,10 +1,12 @@
 name: 'Dockerize client-frontend'
 on:
-  push
+  push:
+    paths:
+    - 'client-frontend/**'
 
 jobs:
-  check-commit-message:
-    name: Check Commit Message
+  build-and-deploy:
+    name: Build and deploy
     runs-on: ubuntu-latest
     steps:
       - name: Check Commit Type

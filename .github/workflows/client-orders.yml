@@ -1,17 +1,14 @@
 name: 'Dockerize client-orders'
 on:
-  push
+  push:
+    paths:
+    - 'client-orders/**'
 
 jobs:
-  check-commit-message:
-    name: Check Commit Message
+  build-and-deploy:
+    name: Build and deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Check Commit Type
-        uses: gsactions/commit-message-checker@v1
-        with:
-          pattern: '(.*)client-orders(.*)'
-          error: 'No need to continue'
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build native
