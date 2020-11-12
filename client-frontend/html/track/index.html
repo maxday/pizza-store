@@ -73,7 +73,7 @@
             body: JSON.stringify(pizza)
           });
           console.log(response.status);
-          location.href = `track/?uuid=${orderId}&name=tracking`
+          location.href = `/track/?uuid=${orderId}&name=tracking`
         })().catch(err => {
             console.error(err);
         });
