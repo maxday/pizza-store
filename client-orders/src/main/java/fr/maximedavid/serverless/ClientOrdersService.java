@@ -41,7 +41,7 @@ public class ClientOrdersService {
     public Uni<JsonObject> get(String uuid) {
         return getCollection()
                 .find(eq("uuid", uuid))
-                .map(doc -> new JsonObject().put("uuid", doc.getString("uuid")))
+                .map(doc -> new JsonObject().put("evendId", doc.getString("status")))
                 .collectItems()
                 .first();
     }
