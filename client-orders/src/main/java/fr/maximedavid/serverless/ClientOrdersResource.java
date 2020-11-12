@@ -19,4 +19,9 @@ public class ClientOrdersResource {
     public Uni<JsonObject> add(PizzaOrder pizzaOrder) {
         return clientOrdersService.createOrder(pizzaOrder);
     }
+
+    @GET
+    public Uni<String> get(@QueryParam("uuid") String uuid) {
+        return clientOrdersService.get(uuid);
+    }
 }

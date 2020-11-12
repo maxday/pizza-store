@@ -1,5 +1,8 @@
 package fr.maximedavid.serverless;
 
+import com.mongodb.client.MongoCursor;
+import io.quarkus.mongodb.reactive.ReactiveMongoClient;
+import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -11,11 +14,19 @@ import io.vertx.mutiny.core.Vertx;
 
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.ext.web.client.WebClient;
+import org.bson.Document;
+
+import java.util.List;
+
+import static com.mongodb.client.model.Filters.eq;
 
 @ApplicationScoped
 public class ClientOrdersService {
 
     private WebClient webclient;
+
+    @Inject
+    ReactiveMongoClient mongoClient;
 
     @Inject
     Vertx vertx;
@@ -25,6 +36,18 @@ public class ClientOrdersService {
 
     public Uni<JsonObject> createOrder(PizzaOrder pizzaOrder) {
         return publishMessage(pizzaOrder.getUuid(), pizzaOrder.getName());
+    }
+
+    public Uni<String> get(String uuid) {
+        return getCollection()
+                .find(eq("uuid", uuid))
+                .map(doc -> doc.getString("uuid"))
+                .collectItems()
+                .first();
+    }
+
+    private ReactiveMongoCollection<Document> getCollection() {
+        return mongoClient.getDatabase("pizzaStore").getCollection("orders");
     }
 
     public Uni<JsonObject> publishMessage(String uuid, String name) {
