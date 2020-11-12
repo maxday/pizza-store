@@ -43,7 +43,7 @@ public class ManagerService {
         PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventId);
         System.out.println(pubSubEvent);
         this.webclient = WebClient.create(vertx,
-                new WebClientOptions().setDefaultHost(configuration.getApiHost()).setDefaultPort(443).setSsl(true));
+                new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(443).setSsl(true));
         return this.webclient
                 .post(configuration.getPubsubTopicPublishUrl())
                 .bearerTokenAuthentication(tokenService.getAccessToken())

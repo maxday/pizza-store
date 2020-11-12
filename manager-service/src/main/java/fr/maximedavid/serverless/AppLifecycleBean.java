@@ -45,12 +45,12 @@ public class AppLifecycleBean {
     void onStart(@Observes StartupEvent ev) {
         LOGGER.info("The application is starting..." + configuration.getServiceAccount());
         try {
-            String jwt = generateJwt("237318786155-compute@developer.gserviceaccount.com", "https://www.googleapis.com/oauth2/v4/token", 3600);
+            String jwt = generateJwt(configuration.getServiceEmail(),
+                    configuration.getAudience(), configuration.getTokenExpiryLength());
             this.webclient = WebClient.create(vertx,
-                    new WebClientOptions().setDefaultHost("www.googleapis.com").setDefaultPort(443).setSsl(true));
-
+                    new WebClientOptions().setDefaultHost(configuration.getApiHost()).setDefaultPort(443).setSsl(true));
             HttpResponse<Buffer> res = this.webclient
-                    .post("/oauth2/v4/token")
+                    .post(configuration.getApiTokenPath())
                     .sendMultipartForm(io.vertx.mutiny.ext.web.multipart.MultipartForm.newInstance(
                             MultipartForm.create()
                                     .attribute("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
@@ -78,7 +78,7 @@ public class AppLifecycleBean {
         JWTCreator.Builder token = JWT.create()
                 .withIssuedAt(now)
                 .withExpiresAt(expTime)
-                .withClaim("scope", "https://www.googleapis.com/auth/pubsub")
+                .withClaim("scope", configuration.getTokenScope())
                 .withIssuer(saEmail)
                 .withAudience(audience)
                 .withSubject(saEmail)
