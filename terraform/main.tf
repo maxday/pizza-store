@@ -23,6 +23,10 @@ resource "google_cloud_run_service" "clientorders" {
           value = var.pubsub_topic
         }
         env {
+          name = "QUARKUS_MONGODB_CONNECTION_STRING"
+          value = var.mongo_connexion_string
+        }
+        env {
           name = "GCP_API_TOKEN"
           value = var.token
         }

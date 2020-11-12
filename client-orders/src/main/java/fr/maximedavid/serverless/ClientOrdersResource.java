@@ -21,6 +21,7 @@ public class ClientOrdersResource {
     }
 
     @GET
+    @Path("/{uuid}")
     public Uni<JsonObject> get(@PathParam("uuid") String uuid) {
         return clientOrdersService.get(uuid);
     }
