@@ -1,0 +1,16 @@
+name: 'Dockerize client-frontend'
+on:
+  push
+
+jobs:
+  check-commit-message:
+    name: Check Commit Message
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Commit Type
+        uses: gsactions/commit-message-checker@v1
+        with:
+          pattern: '(.*)client-frontend(.*)'
+          error: 'No need to continue'
+      - name: Checkout
+        uses: actions/checkout@v2
