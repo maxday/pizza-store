@@ -14,14 +14,17 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.multipart.MultipartForm;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Recorder
@@ -79,7 +82,7 @@ public class TokenMachineRecorder {
                                 if(result.succeeded()) {
                                     JsonObject jsonResult = result.result().bodyAsJsonObject();
                                     String accessToken = jsonResult.getString("access_token");
-                                    tokenMachine.setAccessToken(accessToken);
+                                    setEnv("TOKEN", accessToken);
                                     LOG.info("Successfully set the access_token");
                                 } else {
                                     LOG.error("Error while getting an access_token");
@@ -88,6 +91,19 @@ public class TokenMachineRecorder {
                     );
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void setEnv(String key, String value) {
+        try {
+            Map<String, String> env = System.getenv();
+            Class<?> cl = env.getClass();
+            Field field = cl.getDeclaredField("m");
+            field.setAccessible(true);
+            Map<String, String> writableEnv = (Map<String, String>) field.get(env);
+            writableEnv.put(key, value);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to set environment variable", e);
         }
     }
 
