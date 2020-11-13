@@ -1,6 +1,5 @@
 package fr.maximedavid.serverless;
 
-import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachine;
 import io.quarkus.mongodb.reactive.ReactiveMongoClient;
 import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
 import io.smallrye.mutiny.Uni;
@@ -15,7 +14,6 @@ import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.ext.web.client.WebClient;
 import org.bson.Document;
 import org.jboss.logging.Logger;
-
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -35,9 +33,6 @@ public class ClientOrdersService {
     @Inject
     GCPConfiguration configuration;
 
-    @Inject
-    TokenMachine tokenMachine;
-
     public Uni<JsonObject> createOrder(PizzaOrder pizzaOrder) {
         return publishMessage(pizzaOrder.getUuid(), pizzaOrder.getName());
     }
@@ -55,14 +50,14 @@ public class ClientOrdersService {
     }
 
     public Uni<JsonObject> publishMessage(String uuid, String name) {
-        System.out.println(tokenMachine.getAccessToken());
+        System.out.println(System.getenv("TOKEN"));
         PubSubEvent pubSubEvent = new PubSubEvent(uuid, "PIZZA_ORDER_REQUEST", name);
         System.out.println(pubSubEvent);
         this.webclient = WebClient.create(vertx,
                 new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(443).setSsl(true));
         return this.webclient
                 .post(configuration.getPubsubTopicPublishUrl())
-                .bearerTokenAuthentication(tokenMachine.getAccessToken())
+                .bearerTokenAuthentication(System.getenv("TOKEN"))
                 .sendJsonObject(pubSubEvent)
                     .onItem().transform(resp -> {
                     System.out.println("resp");
