@@ -14,10 +14,6 @@ public class TokenMachine {
 
     private String accessToken;
 
-    public TokenMachine() {
-
-    };
-
     public TokenMachine(String audience,
                         Integer expiryLength, String apiHost,
                         String apiPath, String scope, String serviceAccount) {
