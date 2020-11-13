@@ -32,7 +32,7 @@ app.get('/events/:uuid', function (req, res) {
 const listenForMessages = async () => {
   try {
 	const pubSubClient = new PubSub();
-  	const [subscription] = await pubSubClient.topic('pizza-store').createSubscription('rand'+Math.random());
+  	const [subscription] = await pubSubClient.topic(process.env.TOPIC_NAME).createSubscription('rand'+Math.random());
 
 	const messageHandler = message => {
 		console.log(`message data: ${JSON.stringify(message.data)}`);

@@ -22,13 +22,15 @@ resource "google_cloud_run_service" "clientorders" {
           name = "GCP_PUBSUB_TOPIC_PUBLISH_URL"
           value = var.pubsub_topic
         }
-        env {
-          name = "QUARKUS_MONGODB_CONNECTION_STRING"
-          value = var.mongo_connexion_string
-        }
+
         env {
           name = "QUARKUS_TOKEN_MACHINE_SERVICE_ACCOUNT"
           value = var.service_account
+        }
+        resources {
+          limits = {
+            memory        = "128Mi"
+          }
         }
       }
     }
@@ -66,6 +68,11 @@ resource "google_cloud_run_service" "orders" {
           name = "QUARKUS_TOKEN_MACHINE_SERVICE_ACCOUNT"
           value = var.service_account
         }
+        resources {
+          limits = {
+            memory        = "128Mi"
+          }
+        }
       }
     }
   }
@@ -102,6 +109,11 @@ resource "google_cloud_run_service" "manager" {
           name = "QUARKUS_TOKEN_MACHINE_SERVICE_ACCOUNT"
           value = var.service_account
         }
+        resources {
+          limits = {
+            memory        = "128Mi"
+          }
+        }
       }
     }
   }
@@ -130,6 +142,11 @@ resource "google_cloud_run_service" "clientfrontend" {
           name = "ORDERS_ENDPOINT"
           value = google_cloud_run_service.clientorders.status[0].url
         }
+        resources {
+          limits = {
+            memory        = "128Mi"
+          }
+        }
       }
     }
   }
@@ -155,8 +172,17 @@ resource "google_cloud_run_service" "managerfrontend" {
       containers {
         image = "gcr.io/${var.project_id}/manager-frontend"
         env {
+          name = "EVENTS_ENDPOINT"
+          value = google_cloud_run_service.managerssehandler.status[0].url
+        }
+        env {
           name = "ORDERS_ENDPOINT"
           value = google_cloud_run_service.manager.status[0].url
+        }
+        resources {
+          limits = {
+            memory        = "128Mi"
+          }
         }
       }
     }
@@ -182,6 +208,48 @@ resource "google_cloud_run_service" "clientssehandler" {
     spec {
       containers {
         image = "gcr.io/${var.project_id}/client-sse-handler"
+        resources {
+          env {
+            name = "TOPIC_NAME"
+            value = "pizza-store"
+          }
+          limits = {
+            memory        = "128Mi"
+          }
+        }
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+
+  metadata {
+    namespace = var.project_id
+  }
+
+  depends_on = [google_project_service.run]
+}
+
+resource "google_cloud_run_service" "managerssehandler" {
+  name     = "managerssehandler"
+  location = "us-central1"
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/${var.project_id}/client-sse-handler"
+        resources {
+          env {
+            name = "TOPIC_NAME"
+            value = "pizza-store-manager"
+          }
+          limits = {
+            memory        = "128Mi"
+          }
+        }
       }
     }
   }
@@ -202,6 +270,10 @@ resource "google_pubsub_topic" "pizza-store" {
   name = "pizza-store"
 }
 
+resource "google_pubsub_topic" "pizza-store" {
+  name = "pizza-store-manager"
+}
+
 resource "google_pubsub_subscription" "pizza-store-push-sub" {
   name  = "pizza-store-push-sub"
   topic = google_pubsub_topic.pizza-store.name
@@ -216,7 +288,24 @@ resource "google_pubsub_subscription" "pizza-store-push-sub" {
     push_endpoint = "${google_cloud_run_service.orders.status[0].url}/orders"
   }
 
-  filter = "attributes.eventId = \"PIZZA_ORDER_REQUEST\" OR attributes.eventId = \"PIZZA_PREPARED_REQUEST\" OR attributes.eventId = \"PIZZA_BAKED_REQUEST\" OR attributes.eventId = \"PIZZA_LEFT_STORE_REQUEST\" OR attributes.eventId = \"PIZZA_DELIVERED_REQUEST\" OR attributes.eventId = \"PIZZA_STATUS_REQUEST\""
+  filter = "attributes.eventId = \"PIZZA_ORDER_REQUEST\" OR attributes.eventId = \"PIZZA_PREPARED_REQUEST\" OR attributes.eventId = \"PIZZA_BAKED_REQUEST\" OR attributes.eventId = \"PIZZA_LEFT_STORE_REQUEST\" OR attributes.eventId = \"PIZZA_DELIVERED_REQUEST\""
+}
+
+resource "google_pubsub_subscription" "pizza-store-push-sub-check-status" {
+  name  = "pizza-store-push-sub-check-status"
+  topic = google_pubsub_topic.pizza-store.name
+
+  ack_deadline_seconds = 20
+
+  retry_policy {
+    minimum_backoff = "10s"
+  }
+
+  push_config {
+    push_endpoint = "${google_cloud_run_service.orders.status[0].url}/orders"
+  }
+
+  filter = "attributes.eventId = \"PIZZA_STATUS_REQUEST\" OR attributes.eventId = \"PIZZA_ORDER_LIST_REQUEST\""
 }
 
 resource "google_cloud_run_service_iam_binding" "auth_orders" {
@@ -263,6 +352,16 @@ resource "google_cloud_run_service_iam_binding" "auth_client_sse_handler" {
   location    = google_cloud_run_service.clientssehandler.location
   project     = google_cloud_run_service.clientssehandler.project
   service     = google_cloud_run_service.clientssehandler.name
+  role = "roles/run.invoker"
+  members = [
+    "allUsers",
+  ]
+}
+
+resource "google_cloud_run_service_iam_binding" "auth_manager_sse_handler" {
+  location    = google_cloud_run_service.managerssehandler.location
+  project     = google_cloud_run_service.managerssehandler.project
+  service     = google_cloud_run_service.managerssehandler.name
   role = "roles/run.invoker"
   members = [
     "allUsers",

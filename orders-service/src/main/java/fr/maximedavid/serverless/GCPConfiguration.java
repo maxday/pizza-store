@@ -6,6 +6,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ConfigProperties(prefix = "gcp")
 public interface GCPConfiguration { ;
     String getPubsubTopicPublishUrl();
+    String getPubsubManagerTopicPublishUrl();
 
     @ConfigProperty(defaultValue = "pubsub.googleapis.com")
     String getPubsubApiHost();

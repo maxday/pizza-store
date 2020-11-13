@@ -5,18 +5,12 @@ import io.smallrye.mutiny.Uni;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import io.quarkus.mongodb.reactive.ReactiveMongoClient;
-import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
-
 import io.vertx.core.json.JsonObject;
 
 import io.vertx.mutiny.core.Vertx;
 
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.ext.web.client.WebClient;
-import org.bson.Document;
-
-import java.util.List;
 
 @ApplicationScoped
 public class ManagerService {
@@ -25,9 +19,6 @@ public class ManagerService {
 
     @Inject
     Vertx vertx;
-
-    @Inject
-    ReactiveMongoClient mongoClient;
 
     @Inject
     GCPConfiguration configuration;
@@ -60,19 +51,8 @@ public class ManagerService {
                 });
     }
 
-    public Uni<List<PizzaEvent>> listOrders() {
-        return getCollection().find()
-                .map(doc -> {
-                    PizzaEvent pizzaEvent = new PizzaEvent();
-                    pizzaEvent.setUuid(doc.getString("uuid"));
-                    pizzaEvent.setName(doc.getString("name"));
-                    pizzaEvent.setEventId(doc.getString("status"));
-                    return pizzaEvent;
-                }).collectItems().asList();
-    }
-
-    private ReactiveMongoCollection<Document> getCollection() {
-        return mongoClient.getDatabase("pizzaStore").getCollection("orders");
+    public Uni<JsonObject> listOrders() {
+        return publishMessage(null, "PIZZA_ORDER_LIST_REQUEST");
     }
 
 

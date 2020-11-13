@@ -50,6 +50,8 @@ public class OrdersService {
             return handlePizzaChangeStatusRequest(uuid, eventId);
         } else if("PIZZA_STATUS_REQUEST".equals(eventId)) {
             return handlePizzaStatusRequest(uuid, eventId);
+        } else if("PIZZA_ORDER_LIST_REQUEST".equals(eventId)) {
+            return handlePizzaOrderListRequest();
         }
         else {
             return Uni.createFrom().nullItem();
@@ -63,7 +65,7 @@ public class OrdersService {
                 .append("uuid", uuid)
                 .append("name", name)
                 .append("status", "PIZZA_ORDERED");
-        return getCollection().insertOne(document).flatMap(res -> publishMessage(uuid, "PIZZA_ORDERED", null));
+        return getCollection().insertOne(document).flatMap(res -> publishMessage(uuid, "PIZZA_ORDERED", null, null, false));
     }
 
     private Uni<JsonObject> handlePizzaStatusRequest(String uuid, String name) {
@@ -71,28 +73,41 @@ public class OrdersService {
                 .find(eq("uuid", uuid))
                 .map(doc -> doc.getString("status"))
                 .collectItems()
-                .first().flatMap(res -> publishMessage(uuid, "PIZZA_STATUS_REQUEST_COMPLETED", res));
+                .first().flatMap(res -> publishMessage(uuid, "PIZZA_STATUS_REQUEST_COMPLETED", res, null, false));
     }
 
     private Uni<JsonObject> handlePizzaChangeStatusRequest(String uuid, String eventId) {
         LOG.info("handlePizzaChangeStatusRequest uuid = " + uuid);
         LOG.info("handlePizzaChangeStatusRequest eventId = " + eventId);
         String newEventId = eventId.replace("_REQUEST", "");
-        return getCollection().updateOne(eq("uuid", uuid), new Document("$set", new Document("status", newEventId))).flatMap(res -> publishMessage(uuid, newEventId, null));
+        return getCollection().updateOne(eq("uuid", uuid), new Document("$set", new Document("status", newEventId))).flatMap(res -> publishMessage(uuid, newEventId, null, null, false));
+    }
+
+    public Uni<JsonObject> handlePizzaOrderListRequest() {
+        return getCollection().find()
+                .map(doc -> {
+                    JsonObject order = new JsonObject();
+                    order.put("uuid", doc.getString("uuid"));
+                    order.put("name", doc.getString("name"));
+                    order.put("status", doc.getString("status"));
+                    return order;
+                }).collectItems().asList()
+                .flatMap(res -> publishMessage(null, "PIZZA_ORDER_LIST_REQUEST_COMPLETED", null, res.toString(), true));
     }
 
     private ReactiveMongoCollection<Document> getCollection() {
         return mongoClient.getDatabase("pizzaStore").getCollection("orders");
     }
 
-    public Uni<JsonObject> publishMessage(String uuid, String eventId, String extraData) {
+    public Uni<JsonObject> publishMessage(String uuid, String eventId, String extraData, String body, boolean isManagerTopic) {
         LOG.info("publishMessage");
         String token = System.getProperty("access.token");
-        OutgoingPubSubEvent pubSubEvent = new OutgoingPubSubEvent(uuid, eventId, extraData);
+        String topicPath = isManagerTopic ? configuration.getPubsubManagerTopicPublishUrl() : configuration.getPubsubTopicPublishUrl()
+        OutgoingPubSubEvent pubSubEvent = new OutgoingPubSubEvent(uuid, eventId, extraData, body);
         this.webclient = WebClient.create(vertx,
                 new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(configuration.getPubsubApiPort()).setSsl(configuration.getPubsubApiPort() == 443));
         return this.webclient
-                .post(configuration.getPubsubTopicPublishUrl())
+                .post(topicPath)
                 .bearerTokenAuthentication(token)
                 .sendJsonObject(pubSubEvent)
                 .onItem().transform(resp -> {

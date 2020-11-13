@@ -58,8 +58,8 @@
                 'Content-Type': 'application/json'
               }
             });
-            const result = await response.json();
-            result.forEach(e => cloneLine(e, document.getElementById('orderList')));
+            const result = response.status;
+            console.log(result);
           })().catch(err => {
             console.error(err);
           });
@@ -85,7 +85,28 @@
             console.error(err);
           });
         }
-        fetchOrders();
+
+        const uuidv4 = () => {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            // thanks ! https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid
+        }
+
+        const source = new EventSource(`/events/${uuidv4()}`);
+        source.onopen = event => {
+          fetchOrders();
+        };
+
+        source.onmessage = event => {
+          console.log(event);
+          console.log(event.data);
+          const data = JSON.parse(event.data);
+          //result.forEach(e => cloneLine(e, document.getElementById('orderList')));
+        };
+
+      
     </script>
   </body>
 </html>
