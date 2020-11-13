@@ -5,7 +5,7 @@ import io.quarkus.runtime.annotations.ConfigPhase;
 import io.quarkus.runtime.annotations.ConfigRoot;
 
 @ConfigRoot(name = "token-machine", phase = ConfigPhase.RUN_TIME)
-public final class TokenMachineConfig {
+public class TokenMachineConfig {
 
     /**
      * Service account (base64).
