@@ -28,15 +28,6 @@ import java.util.concurrent.TimeUnit;
 public class TokenMachineRecorder {
 
     private static final Logger LOG = Logger.getLogger(TokenMachineRecorder.class);
-    TokenMachineConfig configuration;
-
-
-    public BeanContainerListener setConfig(TokenMachineConfig tokenMachineConfig) {
-        return beanContainer -> {
-            TokenMachineProducer producer = beanContainer.instance(TokenMachineProducer.class);
-            producer.setTokenMachineConfig(tokenMachineConfig);
-        };
-    }
 
     public void configureRuntimeConfig(TokenMachineConfig tokenMachineConfig) {
         Arc.container().instance(TokenMachineProducer.class).get().setTokenMachineConfig(tokenMachineConfig);
