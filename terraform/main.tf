@@ -27,10 +27,6 @@ resource "google_cloud_run_service" "clientorders" {
           value = var.mongo_connexion_string
         }
         env {
-          name = "QUARKUS_TOKEN_MACHINE_AUDIENCE"
-          value = var.audience
-        }
-        env {
           name = "QUARKUS_TOKEN_MACHINE_SERVICE_ACCOUNT"
           value = var.service_account
         }
@@ -67,10 +63,6 @@ resource "google_cloud_run_service" "orders" {
           value = var.pubsub_topic
         }
         env {
-          name = "QUARKUS_TOKEN_MACHINE_AUDIENCE"
-          value = var.audience
-        }
-        env {
           name = "QUARKUS_TOKEN_MACHINE_SERVICE_ACCOUNT"
           value = var.service_account
         }
@@ -105,10 +97,6 @@ resource "google_cloud_run_service" "manager" {
         env {
           name = "GCP_PUBSUB_TOPIC_PUBLISH_URL"
           value = var.pubsub_topic
-        }
-        env {
-          name = "QUARKUS_TOKEN_MACHINE_AUDIENCE"
-          value = var.audience
         }
         env {
           name = "QUARKUS_TOKEN_MACHINE_SERVICE_ACCOUNT"
