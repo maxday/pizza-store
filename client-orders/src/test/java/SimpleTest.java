@@ -10,12 +10,12 @@ import static org.junit.Assert.assertEquals;
 public class SimpleTest {
 
     @Container
-    PubSubEmulatorContainer pubsub =
-            new PubSubEmulatorContainer(
-                    new DockerImageName("gcr.io/google.com/cloudsdktool/cloud-sdk", "316.0.0-emulators"));
+    PubSubContainer pubsub =
+            new PubSubContainer("gcr.io/google.com/cloudsdktool/cloud-sdk:316.0.0-emulators");
 
     @Test
     public void testSimple() {
+        pubsub.start();
         String emulatorEndpoint = pubsub.getEmulatorEndpoint();
         assertEquals(1, 1);
     }
