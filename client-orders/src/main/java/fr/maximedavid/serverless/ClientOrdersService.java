@@ -39,11 +39,6 @@ public class ClientOrdersService {
     TokenMachine tokenMachine;
 
     public Uni<JsonObject> createOrder(PizzaOrder pizzaOrder) {
-        LOG.info("------------");
-        LOG.info("------------");
-        LOG.info("------------");
-        LOG.info("------------");
-        LOG.info(tokenMachine.getServiceAccount());
         return publishMessage(pizzaOrder.getUuid(), pizzaOrder.getName());
     }
 
