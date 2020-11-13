@@ -2,7 +2,7 @@ name: 'Dockerize client-frontend'
 on:
   push:
     paths:
-    - 'client-frontend/**'
+    - 'client-sse-handler/**'
 
 jobs:
   build-and-deploy:
