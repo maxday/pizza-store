@@ -27,11 +27,11 @@ resource "google_cloud_run_service" "clientorders" {
           value = var.mongo_connexion_string
         }
         env {
-          name = "QUARKES_TOKEN_MACHINE_AUDIENCE"
+          name = "QUARKUS_TOKEN_MACHINE_AUDIENCE"
           value = var.audience
         }
         env {
-          name = "QUARKES_TOKEN_MACHINE_SERVICE_ACCOUNT"
+          name = "QUARKUS_TOKEN_MACHINE_SERVICE_ACCOUNT"
           value = var.service_account
         }
       }
@@ -67,11 +67,11 @@ resource "google_cloud_run_service" "orders" {
           value = var.pubsub_topic
         }
         env {
-          name = "QUARKES_TOKEN_MACHINE_AUDIENCE"
+          name = "QUARKUS_TOKEN_MACHINE_AUDIENCE"
           value = var.audience
         }
         env {
-          name = "QUARKES_TOKEN_MACHINE_SERVICE_ACCOUNT"
+          name = "QUARKUS_TOKEN_MACHINE_SERVICE_ACCOUNT"
           value = var.service_account
         }
       }
@@ -107,11 +107,11 @@ resource "google_cloud_run_service" "manager" {
           value = var.pubsub_topic
         }
         env {
-          name = "QUARKES_TOKEN_MACHINE_AUDIENCE"
+          name = "QUARKUS_TOKEN_MACHINE_AUDIENCE"
           value = var.audience
         }
         env {
-          name = "QUARKES_TOKEN_MACHINE_SERVICE_ACCOUNT"
+          name = "QUARKUS_TOKEN_MACHINE_SERVICE_ACCOUNT"
           value = var.service_account
         }
       }
