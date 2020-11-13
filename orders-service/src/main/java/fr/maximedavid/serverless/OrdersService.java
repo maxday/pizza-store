@@ -48,7 +48,10 @@ public class OrdersService {
                 || "PIZZA_LEFT_STORE_REQUEST".equals(eventId)
                 || "PIZZA_DELIVERED_REQUEST".equals(eventId)) {
             return handlePizzaChangeStatusRequest(uuid, eventId);
-        } else {
+        } else if("PIZZA_STATUS_REQUEST".equals(eventId)) {
+            return handlePizzaStatusRequest(uuid, eventId);
+        }
+        else {
             return Uni.createFrom().nullItem();
         }
     }
@@ -60,25 +63,32 @@ public class OrdersService {
                 .append("uuid", uuid)
                 .append("name", name)
                 .append("status", "PIZZA_ORDERED");
-        return getCollection().insertOne(document).flatMap(res -> publishMessage(uuid, "PIZZA_ORDERED"));
+        return getCollection().insertOne(document).flatMap(res -> publishMessage(uuid, "PIZZA_ORDERED", null));
+    }
+
+    private Uni<JsonObject> handlePizzaStatusRequest(String uuid, String name) {
+        return getCollection()
+                .find(eq("uuid", uuid))
+                .map(doc -> doc.getString("status"))
+                .collectItems()
+                .first().flatMap(res -> publishMessage(uuid, "PIZZA_STATUS_REQUEST_COMPLTED", res));
     }
 
     private Uni<JsonObject> handlePizzaChangeStatusRequest(String uuid, String eventId) {
         LOG.info("handlePizzaChangeStatusRequest uuid = " + uuid);
         LOG.info("handlePizzaChangeStatusRequest eventId = " + eventId);
         String newEventId = eventId.replace("_REQUEST", "");
-        return getCollection().updateOne(eq("uuid", uuid), new Document("$set", new Document("status", newEventId))).flatMap(res -> publishMessage(uuid, newEventId));
+        return getCollection().updateOne(eq("uuid", uuid), new Document("$set", new Document("status", newEventId))).flatMap(res -> publishMessage(uuid, newEventId, null));
     }
-
 
     private ReactiveMongoCollection<Document> getCollection() {
         return mongoClient.getDatabase("pizzaStore").getCollection("orders");
     }
 
-    public Uni<JsonObject> publishMessage(String uuid, String eventId) {
+    public Uni<JsonObject> publishMessage(String uuid, String eventId, String extraData) {
         LOG.info("publishMessage");
         String token = System.getProperty("access.token");
-        OutgoingPubSubEvent pubSubEvent = new OutgoingPubSubEvent(uuid, eventId);
+        OutgoingPubSubEvent pubSubEvent = new OutgoingPubSubEvent(uuid, eventId, extraData);
         this.webclient = WebClient.create(vertx,
                 new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(configuration.getPubsubApiPort()).setSsl(configuration.getPubsubApiPort() == 443));
         return this.webclient

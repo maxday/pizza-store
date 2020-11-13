@@ -216,7 +216,7 @@ resource "google_pubsub_subscription" "pizza-store-push-sub" {
     push_endpoint = "${google_cloud_run_service.orders.status[0].url}/orders"
   }
 
-  filter = "attributes.eventId = \"PIZZA_ORDER_REQUEST\" OR attributes.eventId = \"PIZZA_PREPARED_REQUEST\" OR attributes.eventId = \"PIZZA_BAKED_REQUEST\" OR attributes.eventId = \"PIZZA_LEFT_STORE_REQUEST\" OR attributes.eventId = \"PIZZA_DELIVERED_REQUEST\""
+  filter = "attributes.eventId = \"PIZZA_ORDER_REQUEST\" OR attributes.eventId = \"PIZZA_PREPARED_REQUEST\" OR attributes.eventId = \"PIZZA_BAKED_REQUEST\" OR attributes.eventId = \"PIZZA_LEFT_STORE_REQUEST\" OR attributes.eventId = \"PIZZA_DELIVERED_REQUEST\" OR attributes.eventId = \"PIZZA_STATUS_REQUEST\""
 }
 
 resource "google_cloud_run_service_iam_binding" "auth_orders" {

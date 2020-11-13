@@ -1,7 +1,5 @@
 package fr.maximedavid.serverless;
 
-import io.quarkus.mongodb.reactive.ReactiveMongoClient;
-import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -12,10 +10,7 @@ import io.vertx.mutiny.core.Vertx;
 
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.ext.web.client.WebClient;
-import org.bson.Document;
 import org.jboss.logging.Logger;
-
-import static com.mongodb.client.model.Filters.eq;
 
 @ApplicationScoped
 public class ClientOrdersService {
@@ -25,33 +20,22 @@ public class ClientOrdersService {
     private static final Logger LOG = Logger.getLogger(ClientOrdersService.class);
 
     @Inject
-    ReactiveMongoClient mongoClient;
-
-    @Inject
     Vertx vertx;
 
     @Inject
     GCPConfiguration configuration;
 
     public Uni<JsonObject> createOrder(PizzaOrder pizzaOrder) {
-        return publishMessage(pizzaOrder.getUuid(), pizzaOrder.getName());
+        return publishMessage(pizzaOrder.getUuid(), "PIZZA_ORDER_REQUEST", pizzaOrder.getName());
     }
 
     public Uni<JsonObject> get(String uuid) {
-        return getCollection()
-                .find(eq("uuid", uuid))
-                .map(doc -> new JsonObject().put("status", doc.getString("status")))
-                .collectItems()
-                .first();
+        return publishMessage(uuid, "PIZZA_STATUS_REQUEST", null);
     }
 
-    private ReactiveMongoCollection<Document> getCollection() {
-        return mongoClient.getDatabase("pizzaStore").getCollection("orders");
-    }
-
-    public Uni<JsonObject> publishMessage(String uuid, String name) {
+    public Uni<JsonObject> publishMessage(String uuid, String eventName, String name) {
         String token = System.getProperty("access.token");
-        PubSubEvent pubSubEvent = new PubSubEvent(uuid, "PIZZA_ORDER_REQUEST", name);
+        PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventName, name);
         this.webclient = WebClient.create(vertx,
                 new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(configuration.getPubsubApiPort()).setSsl(configuration.getPubsubApiPort() == 443));
         return this.webclient
