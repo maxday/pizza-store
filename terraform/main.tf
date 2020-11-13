@@ -31,8 +31,8 @@ resource "google_cloud_run_service" "clientorders" {
           value = var.service_account
         }
         env {
-          name = "GCP_SERVICE_EMAIL"
-          value = var.service_email
+          name = "QUARKES_TOKEN_MACHINE_AUDIENCE"
+          value = var.audience
         }
       }
     }
