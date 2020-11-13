@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build native
-        run: cd client-orders && ./mvnw package -Pnative -Dquarkus.native.container-build=true 
+        run: cd client-orders && ./mvnw install ../ext-gcp-token-machine && ./mvnw package -Pnative -Dquarkus.native.container-build=true 
       - name: Build docker
         run: cd client-orders && docker build -f src/main/docker/Dockerfile.native -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/client-orders .
       - name: Login to GCP

@@ -1,3 +1,7 @@
 tuto
 order-service
 client-sse-handler/node_modules
+ext-gcp-token-machine/target
+ext-gcp-token-machine/.idea
+ext-gcp-token-machine/runtime/target
+ext-gcp-token-machine/deployment/target

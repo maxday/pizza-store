@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>fr.maximedavid.extension</groupId>
-    <artifactId>quarkus-gcp-token-machine-parent</artifactId>
+    <groupId>fr.maximedavid.serverless.extension</groupId>
+    <artifactId>ext-gcp-token-machine-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>GCP Token Machine - Parent</name>
 

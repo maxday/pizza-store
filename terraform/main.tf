@@ -30,6 +30,10 @@ resource "google_cloud_run_service" "clientorders" {
           name = "GCP_SERVICE_ACCOUNT"
           value = var.service_account
         }
+        env {
+          name = "GCP_SERVICE_EMAIL"
+          value = var.service_email
+        }
       }
     }
   }
@@ -63,8 +67,12 @@ resource "google_cloud_run_service" "orders" {
           value = var.pubsub_topic
         }
         env {
-          name = "GCP_API_TOKEN"
-          value = var.token
+          name = "GCP_SERVICE_ACCOUNT"
+          value = var.service_account
+        }
+        env {
+          name = "GCP_SERVICE_EMAIL"
+          value = var.service_email
         }
       }
     }
@@ -101,6 +109,10 @@ resource "google_cloud_run_service" "manager" {
         env {
           name = "GCP_SERVICE_ACCOUNT"
           value = var.service_account
+        }
+        env {
+          name = "GCP_SERVICE_EMAIL"
+          value = var.service_email
         }
       }
     }
