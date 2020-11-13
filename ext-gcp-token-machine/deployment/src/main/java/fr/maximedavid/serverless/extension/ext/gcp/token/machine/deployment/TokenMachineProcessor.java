@@ -23,8 +23,7 @@ public class TokenMachineProcessor {
     void build(BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer,
                BuildProducer<FeatureBuildItem> featureProducer,
                TokenMachineRecorder recorder,
-               TokenMachineConfig runtimeConfig,
-               BuildProducer<BeanContainerListenerBuildItem> containerListenerProducer) {
+               TokenMachineConfig runtimeConfig) {
         featureProducer.produce(new FeatureBuildItem("tokenMachine"));
         recorder.configureRuntimeConfig(runtimeConfig);
         AdditionalBeanBuildItem unremovableProducer = AdditionalBeanBuildItem.unremovableOf(TokenMachineProducer.class);

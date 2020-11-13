@@ -6,7 +6,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.runtime.BeanContainer;
-import io.quarkus.arc.runtime.BeanContainerListener;
 import io.quarkus.runtime.RuntimeValue;
 import io.quarkus.runtime.annotations.Recorder;
 import io.vertx.core.Vertx;
@@ -14,17 +13,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.multipart.MultipartForm;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.Base64;
 import java.util.Date;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Recorder

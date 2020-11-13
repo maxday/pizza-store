@@ -1,7 +1,5 @@
 package fr.maximedavid.serverless.extension.ext.gcp.token.machine;
 
-import io.quarkus.runtime.annotations.ConfigItem;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
