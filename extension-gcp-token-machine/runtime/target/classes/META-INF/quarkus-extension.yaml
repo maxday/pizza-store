@@ -1,6 +1,0 @@
----
-metadata: {}
-group-id: "fr.maximedavid.extension"
-artifact-id: "quarkus-gcp-token-machine"
-version: "1.0-SNAPSHOT"
-name: "GCP Token Machine - Runtime"
