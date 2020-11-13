@@ -45,7 +45,7 @@ const listenForMessages = async () => {
 		else if(jsonData.uuid === "") {
 				//brodcast to managers
 				console.log("brodcast !");
-				Object.keys(clients).forEach(e => e.write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: jsonData.extraData})}\n\n`));
+				Object.keys(clients).forEach(e => clients[e].write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: jsonData.extraData})}\n\n`));
 		}
 		else {
 			console.log("skipping!");
