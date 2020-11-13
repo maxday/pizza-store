@@ -36,62 +36,65 @@ public class TokenMachineRecorder {
         Arc.container().instance(TokenMachineProducer.class).get().setTokenMachineConfig(tokenMachineConfig);
     }
 
-    private String generateJwt(TokenMachine tokenMachine)
-            throws IOException {
+    private String generateJwt(TokenMachine tokenMachine) {
 
         Date now = new Date();
         Date expTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(tokenMachine.expiryLength));
 
-        byte[] res = Base64.getDecoder().decode(tokenMachine.serviceAccount);
-        InputStream stream = new ByteArrayInputStream(res);
+        try {
+            byte[] res = Base64.getDecoder().decode(tokenMachine.serviceAccount);
+            InputStream stream = new ByteArrayInputStream(res);
+            ServiceAccountCredentials cred = ServiceAccountCredentials.fromStream(stream);
+            RSAPrivateKey key = (RSAPrivateKey) cred.getPrivateKey();
 
-        ServiceAccountCredentials cred = ServiceAccountCredentials.fromStream(stream);
-        RSAPrivateKey key = (RSAPrivateKey) cred.getPrivateKey();
+            Algorithm algorithm = Algorithm.RSA256(null, key);
 
-        Algorithm algorithm = Algorithm.RSA256(null, key);
+            JWTCreator.Builder token = JWT.create()
+                    .withIssuedAt(now)
+                    .withExpiresAt(expTime)
+                    .withClaim("scope", tokenMachine.scope)
+                    .withIssuer(cred.getClientEmail())
+                    .withAudience(tokenMachine.audience)
+                    .withSubject(cred.getClientEmail())
+                    .withClaim("email", cred.getClientEmail());
 
-        JWTCreator.Builder token = JWT.create()
-                .withIssuedAt(now)
-                .withExpiresAt(expTime)
-                .withClaim("scope", tokenMachine.scope)
-                .withIssuer(cred.getClientEmail())
-                .withAudience(tokenMachine.audience)
-                .withSubject(cred.getClientEmail())
-                .withClaim("email", cred.getClientEmail());
-
-        return token.sign(algorithm);
+            return token.sign(algorithm);
+        } catch(Exception e) {
+            LOG.error("Impossible to generate the JWT");
+            return "";
+        }
     }
 
     public void setAccessToken(RuntimeValue<Vertx> vertx, BeanContainer container) {
         TokenMachine tokenMachine = container.instance(TokenMachine.class);
-
-        try {
-            String jwt = generateJwt(tokenMachine);
-            WebClient webClient =  WebClient.create(vertx.getValue(),
-                    new WebClientOptions()
-                            .setDefaultHost(tokenMachine.apiHost)
-                            .setDefaultPort(443)
-                            .setSsl(true));
-            webClient
-                    .post(tokenMachine.apiPath)
-                    .sendMultipartForm(
-                            MultipartForm.create()
-                                    .attribute("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-                                    .attribute("assertion", jwt),
-                            (result -> {
-                                if(result.succeeded()) {
-                                    JsonObject jsonResult = result.result().bodyAsJsonObject();
-                                    String accessToken = jsonResult.getString("access_token");
+        String jwt = generateJwt(tokenMachine);
+        WebClient webClient =  WebClient.create(vertx.getValue(),
+                new WebClientOptions()
+                        .setDefaultHost(tokenMachine.apiHost)
+                        .setDefaultPort(443)
+                        .setSsl(true));
+        webClient
+                .post(tokenMachine.apiPath)
+                .sendMultipartForm(
+                        MultipartForm.create()
+                                .attribute("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                                .attribute("assertion", jwt),
+                        (result -> {
+                            if(result.succeeded()) {
+                                JsonObject jsonResult = result.result().bodyAsJsonObject();
+                                String accessToken = jsonResult.getString("access_token");
+                                if(null != accessToken) {
                                     System.setProperty("access.token", accessToken);
                                     LOG.info("Successfully set the access_token");
-                                } else {
+                                }
+                                else {
                                     LOG.error("Error while getting an access_token");
                                 }
-                            })
-                    );
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                            } else {
+                                LOG.error("Error while getting an access_token");
+                            }
+                        })
+                );
     }
 
 
