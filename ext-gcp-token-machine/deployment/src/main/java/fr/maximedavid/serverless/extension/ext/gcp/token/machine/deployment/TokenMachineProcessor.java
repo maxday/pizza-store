@@ -12,12 +12,13 @@ import io.quarkus.deployment.annotations.ExecutionTime;
 import io.quarkus.deployment.annotations.Record;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
 import io.quarkus.vertx.deployment.VertxBuildItem;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 
 public class TokenMachineProcessor {
 
     private static final Logger LOG = Logger.getLogger(TokenMachineProcessor.class);
-    private TokenMachineConfig tokenMachineConfig;
+
 
     @Record(ExecutionTime.STATIC_INIT)
     @BuildStep
@@ -28,8 +29,9 @@ public class TokenMachineProcessor {
         featureProducer.produce(new FeatureBuildItem("tokenMachine"));
         AdditionalBeanBuildItem unremovableProducer = AdditionalBeanBuildItem.unremovableOf(TokenMachineProducer.class);
         additionalBeanProducer.produce(unremovableProducer);
+        String config = ConfigProvider.getConfig().getOptionalValue("quarkus.token-machine.service-account", String.class).orElse("toto");
         containerListenerProducer.produce(
-                new BeanContainerListenerBuildItem(recorder.setTokenMachineConfig(tokenMachineConfig)));
+                new BeanContainerListenerBuildItem(recorder.setTokenMachineConfig(config)));
     }
 
     @Record(ExecutionTime.RUNTIME_INIT)

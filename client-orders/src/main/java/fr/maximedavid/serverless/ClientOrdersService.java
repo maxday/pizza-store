@@ -14,7 +14,7 @@ import io.vertx.mutiny.core.Vertx;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.ext.web.client.WebClient;
 import org.bson.Document;
-
+import org.jboss.logging.Logger;
 
 
 import static com.mongodb.client.model.Filters.eq;
@@ -23,6 +23,8 @@ import static com.mongodb.client.model.Filters.eq;
 public class ClientOrdersService {
 
     private WebClient webclient;
+
+    private static final Logger LOG = Logger.getLogger(ClientOrdersService.class);
 
     @Inject
     ReactiveMongoClient mongoClient;
@@ -37,6 +39,11 @@ public class ClientOrdersService {
     TokenMachine tokenMachine;
 
     public Uni<JsonObject> createOrder(PizzaOrder pizzaOrder) {
+        LOG.info("------------");
+        LOG.info("------------");
+        LOG.info("------------");
+        LOG.info("------------");
+        LOG.info(tokenMachine.getServiceAccount());
         return publishMessage(pizzaOrder.getUuid(), pizzaOrder.getName());
     }
 

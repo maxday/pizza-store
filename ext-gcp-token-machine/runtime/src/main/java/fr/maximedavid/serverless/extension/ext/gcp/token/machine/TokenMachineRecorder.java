@@ -28,10 +28,10 @@ public class TokenMachineRecorder {
 
     private static final Logger LOG = Logger.getLogger(TokenMachineRecorder.class);
 
-    public BeanContainerListener setTokenMachineConfig(TokenMachineConfig tokenMachineConfig) {
+    public BeanContainerListener setTokenMachineConfig(String serviceAccount) {
         return beanContainer -> {
             TokenMachineProducer producer = beanContainer.instance(TokenMachineProducer.class);
-            producer.setTokenMachineConfig(tokenMachineConfig);
+            producer.setTokenMachineConfig(serviceAccount);
         };
     }
 

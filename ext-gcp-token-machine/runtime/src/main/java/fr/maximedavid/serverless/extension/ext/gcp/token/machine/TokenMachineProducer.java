@@ -1,5 +1,7 @@
 package fr.maximedavid.serverless.extension.ext.gcp.token.machine;
 
+import io.quarkus.runtime.annotations.ConfigItem;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
@@ -20,7 +22,13 @@ public class TokenMachineProducer {
         );
     }
 
-    public void setTokenMachineConfig(TokenMachineConfig tokenMachineConfig) {
-        this.tokenMachineConfig = tokenMachineConfig;
+    public void setTokenMachineConfig(String serviceAccount) {
+        this.tokenMachineConfig = new TokenMachineConfig();
+        this.tokenMachineConfig.serviceAccount = serviceAccount;
+        this.tokenMachineConfig.expiryLength = 3600;
+        this.tokenMachineConfig.scope = "https://www.googleapis.com/auth/pubsub";
+        this.tokenMachineConfig.audience = "https://www.googleapis.com/oauth2/v4/token";
+        this.tokenMachineConfig.apiHost =  "www.googleapis.com";
+        this.tokenMachineConfig.apiPath = "/oauth2/v4/token";
     }
 }
