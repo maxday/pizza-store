@@ -1,6 +1,5 @@
 package fr.maximedavid.serverless;
 
-import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachine;
 import io.quarkus.mongodb.reactive.ReactiveMongoClient;
 import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
 import io.smallrye.mutiny.Uni;
@@ -29,9 +28,6 @@ public class OrdersService {
 
     @Inject
     GCPConfiguration configuration;
-
-    @Inject
-    TokenMachine tokenMachine;
 
     @Inject
     ReactiveMongoClient mongoClient;
@@ -81,12 +77,13 @@ public class OrdersService {
 
     public Uni<JsonObject> publishMessage(String uuid, String eventId) {
         LOG.info("publishMessage");
+        String token = System.getProperty("access.token");
         OutgoingPubSubEvent pubSubEvent = new OutgoingPubSubEvent(uuid, eventId);
         this.webclient = WebClient.create(vertx,
                 new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(443).setSsl(true));
         return this.webclient
                 .post(configuration.getPubsubTopicPublishUrl())
-                .bearerTokenAuthentication(tokenMachine.getAccessToken())
+                .bearerTokenAuthentication(token)
                 .sendJsonObject(pubSubEvent)
                 .onItem().transform(resp -> {
                     if (resp.statusCode() == 200) {

@@ -1,6 +1,5 @@
 package fr.maximedavid.serverless;
 
-import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachine;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -28,9 +27,6 @@ public class ManagerService {
     Vertx vertx;
 
     @Inject
-    TokenMachine tokenMachine;
-
-    @Inject
     ReactiveMongoClient mongoClient;
 
     @Inject
@@ -43,11 +39,12 @@ public class ManagerService {
     public Uni<JsonObject> publishMessage(String uuid, String eventId) {
         PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventId);
         System.out.println(pubSubEvent);
+        String token = System.getProperty("access.token");
         this.webclient = WebClient.create(vertx,
                 new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(443).setSsl(true));
         return this.webclient
                 .post(configuration.getPubsubTopicPublishUrl())
-                .bearerTokenAuthentication(tokenMachine.getAccessToken())
+                .bearerTokenAuthentication(token)
                 .sendJsonObject(pubSubEvent)
                 .onItem().transform(resp -> {
                     System.out.println("resp");
