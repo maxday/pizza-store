@@ -65,6 +65,10 @@ resource "google_cloud_run_service" "orders" {
           value = var.pubsub_topic
         }
         env {
+          name = "GCP_PUBSUB_MANAGER_TOPIC_PUBLISH_URL"
+          value = var.pubsub_manager_topic
+        }
+        env {
           name = "QUARKUS_TOKEN_MACHINE_SERVICE_ACCOUNT"
           value = var.service_account
         }

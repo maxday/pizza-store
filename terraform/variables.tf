@@ -17,3 +17,7 @@ variable "pubsub_topic" {
     type  = string
     default = "/v1/projects/techday-pizza-store/topics/pizza-store:publish"
 }
+variable "pubsub_manager_topic" {
+    type  = string
+    default = "/v1/projects/techday-pizza-store/topics/pizza-store-manager:publish"
+}
