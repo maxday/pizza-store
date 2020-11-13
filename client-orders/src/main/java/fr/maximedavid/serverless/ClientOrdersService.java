@@ -50,14 +50,15 @@ public class ClientOrdersService {
     }
 
     public Uni<JsonObject> publishMessage(String uuid, String name) {
-        System.out.println(System.getenv("TOKEN"));
+        String token = System.getProperty("access.token");
+        LOG.info(token);
         PubSubEvent pubSubEvent = new PubSubEvent(uuid, "PIZZA_ORDER_REQUEST", name);
         System.out.println(pubSubEvent);
         this.webclient = WebClient.create(vertx,
                 new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(443).setSsl(true));
         return this.webclient
                 .post(configuration.getPubsubTopicPublishUrl())
-                .bearerTokenAuthentication(System.getenv("TOKEN"))
+                .bearerTokenAuthentication(token)
                 .sendJsonObject(pubSubEvent)
                     .onItem().transform(resp -> {
                     System.out.println("resp");

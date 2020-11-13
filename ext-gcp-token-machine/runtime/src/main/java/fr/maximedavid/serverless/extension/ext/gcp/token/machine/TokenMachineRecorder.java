@@ -82,7 +82,7 @@ public class TokenMachineRecorder {
                                 if(result.succeeded()) {
                                     JsonObject jsonResult = result.result().bodyAsJsonObject();
                                     String accessToken = jsonResult.getString("access_token");
-                                    setEnv("TOKEN", accessToken);
+                                    System.setProperty("access.token", accessToken);
                                     LOG.info("Successfully set the access_token");
                                 } else {
                                     LOG.error("Error while getting an access_token");
@@ -94,17 +94,5 @@ public class TokenMachineRecorder {
         }
     }
 
-    public void setEnv(String key, String value) {
-        try {
-            Map<String, String> env = System.getenv();
-            Class<?> cl = env.getClass();
-            Field field = cl.getDeclaredField("m");
-            field.setAccessible(true);
-            Map<String, String> writableEnv = (Map<String, String>) field.get(env);
-            writableEnv.put(key, value);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to set environment variable", e);
-        }
-    }
 
 }
