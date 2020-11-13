@@ -22,7 +22,7 @@ public class ManagerResource {
     }
 
     @GET
-    public Uni<List<PizzaEvent>> listOrders() {
+    public Uni<JsonObject> listOrders() {
         return managerService.listOrders();
     }
 }
