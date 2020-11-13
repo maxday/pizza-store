@@ -38,11 +38,13 @@ const listenForMessages = async () => {
 		console.log(`message data: ${JSON.stringify(message.data)}`);
 		console.log(`message attributes: ${JSON.stringify(message.attributes)}`);
 		const jsonData = message.attributes;
+		
 		if(jsonData.hasOwnProperty("uuid") && clients.hasOwnProperty(jsonData.uuid)) {
 			console.log("found client");
 			clients[jsonData.uuid].write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: jsonData.extraData})}\n\n`); 
-		} else {
-			console.log("skipping ok");
+		} else if(jsonData.uuid === "") {
+			//brodcast to managers
+			Object.keys(clients).forEach(e => e.write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: jsonData.extraData})}\n\n`));
 		}
 		message.ack();
 	};
