@@ -22,8 +22,3 @@ variable "pubsub_topic" {
     type  = string
     default = "/v1/projects/techday-pizza-store/topics/pizza-store:publish"
 }
-
-variable "service_email" {
-    type  = string
-    default = "237318786155-compute@developer.gserviceaccount.com"
-}
