@@ -1,5 +1,6 @@
 package fr.maximedavid.serverless;
 
+import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachine;
 import io.quarkus.mongodb.reactive.ReactiveMongoClient;
 import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
 import io.smallrye.mutiny.Uni;
@@ -30,7 +31,7 @@ public class OrdersService {
     GCPConfiguration configuration;
 
     @Inject
-    TokenService tokenService;
+    TokenMachine tokenMachine;
 
     @Inject
     ReactiveMongoClient mongoClient;
@@ -85,7 +86,7 @@ public class OrdersService {
                 new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(443).setSsl(true));
         return this.webclient
                 .post(configuration.getPubsubTopicPublishUrl())
-                .bearerTokenAuthentication(tokenService.getAccessToken())
+                .bearerTokenAuthentication(tokenMachine.getAccessToken())
                 .sendJsonObject(pubSubEvent)
                 .onItem().transform(resp -> {
                     if (resp.statusCode() == 200) {
