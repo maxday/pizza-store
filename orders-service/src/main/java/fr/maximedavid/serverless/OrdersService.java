@@ -71,7 +71,7 @@ public class OrdersService {
                 .find(eq("uuid", uuid))
                 .map(doc -> doc.getString("status"))
                 .collectItems()
-                .first().flatMap(res -> publishMessage(uuid, "PIZZA_STATUS_REQUEST_COMPLTED", res));
+                .first().flatMap(res -> publishMessage(uuid, "PIZZA_STATUS_REQUEST_COMPLETED", res));
     }
 
     private Uni<JsonObject> handlePizzaChangeStatusRequest(String uuid, String eventId) {

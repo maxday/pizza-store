@@ -82,9 +82,6 @@
           (async () => {
             const response = await fetch(`/orders/${orderId}`);
             console.log(response.status);
-            const json = await response.json();
-            console.log(json);
-            document.getElementById(json.status).classList.add('btn-success');
           })().catch(err => {
               console.error(err);
           });
@@ -97,6 +94,11 @@
         const data = JSON.parse(event.data);
         if(document.getElementById(data.name)) {
           document.getElementById(data.name).classList.add('btn-success');
+        }
+        if(data.name === "PIZZA_STATUS_REQUEST_COMPLETED") {
+          if(document.getElementById(data.extraData)) {
+            document.getElementById(data.extraData).classList.add('btn-success');
+          }
         }
       };
     </script>

@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 const { v4: uuidv4 } = require('uuid');
 const { PubSub } = require('@google-cloud/pubsub');
+const { json } = require('body-parser');
 
 var app = express();
 app.use(bodyParser.json());
@@ -39,7 +40,7 @@ const listenForMessages = async () => {
 		const jsonData = message.attributes;
 		if(jsonData.hasOwnProperty("uuid") && clients.hasOwnProperty(jsonData.uuid)) {
 			console.log("found client");
-			clients[jsonData.uuid].write(`data: ${JSON.stringify({ name: jsonData.eventId})}\n\n`); 
+			clients[jsonData.uuid].write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: jsonData.extraData})}\n\n`); 
 		} else {
 			console.log("skipping ok");
 		}
