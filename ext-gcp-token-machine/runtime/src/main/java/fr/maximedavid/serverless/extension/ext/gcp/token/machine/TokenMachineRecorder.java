@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import io.quarkus.arc.Arc;
 import io.quarkus.arc.runtime.BeanContainer;
 import io.quarkus.arc.runtime.BeanContainerListener;
 import io.quarkus.runtime.RuntimeValue;
@@ -27,12 +28,18 @@ import java.util.concurrent.TimeUnit;
 public class TokenMachineRecorder {
 
     private static final Logger LOG = Logger.getLogger(TokenMachineRecorder.class);
+    TokenMachineConfig configuration;
 
-    public BeanContainerListener setTokenMachineConfig(String serviceAccount) {
+
+    public BeanContainerListener setConfig(TokenMachineConfig tokenMachineConfig) {
         return beanContainer -> {
             TokenMachineProducer producer = beanContainer.instance(TokenMachineProducer.class);
-            producer.setTokenMachineConfig(serviceAccount);
+            producer.setTokenMachineConfig(tokenMachineConfig);
         };
+    }
+
+    public void configureRuntimeConfig(TokenMachineConfig tokenMachineConfig) {
+        Arc.container().instance(TokenMachineProducer.class).get().setTokenMachineConfig(tokenMachineConfig);
     }
 
     private String generateJwt(TokenMachine tokenMachine)
@@ -92,4 +99,5 @@ public class TokenMachineRecorder {
             e.printStackTrace();
         }
     }
+
 }
