@@ -138,6 +138,11 @@ resource "google_cloud_run_service" "clientfrontend" {
     spec {
       containers {
         image = "gcr.io/${var.project_id}/client-frontend"
+        resources {
+          limits = {
+            memory        = "128Mi"
+          }
+        }
         env {
           name = "EVENTS_ENDPOINT"
           value = google_cloud_run_service.clientssehandler.status[0].url
@@ -145,11 +150,6 @@ resource "google_cloud_run_service" "clientfrontend" {
         env {
           name = "ORDERS_ENDPOINT"
           value = google_cloud_run_service.clientorders.status[0].url
-        }
-        resources {
-          limits = {
-            memory        = "128Mi"
-          }
         }
       }
     }
@@ -212,11 +212,11 @@ resource "google_cloud_run_service" "clientssehandler" {
     spec {
       containers {
         image = "gcr.io/${var.project_id}/client-sse-handler"
+        env {
+          name = "TOPIC_NAME"
+          value = "pizza-store"
+        }
         resources {
-          env {
-            name = "TOPIC_NAME"
-            value = "pizza-store"
-          }
           limits = {
             memory        = "128Mi"
           }
@@ -245,11 +245,11 @@ resource "google_cloud_run_service" "managerssehandler" {
     spec {
       containers {
         image = "gcr.io/${var.project_id}/client-sse-handler"
+        env {
+          name = "TOPIC_NAME"
+          value = "pizza-store-manager"
+        }
         resources {
-          env {
-            name = "TOPIC_NAME"
-            value = "pizza-store-manager"
-          }
           limits = {
             memory        = "128Mi"
           }
@@ -274,7 +274,7 @@ resource "google_pubsub_topic" "pizza-store" {
   name = "pizza-store"
 }
 
-resource "google_pubsub_topic" "pizza-store" {
+resource "google_pubsub_topic" "pizza-store-manager" {
   name = "pizza-store-manager"
 }
 
