@@ -103,9 +103,16 @@
           console.log(event);
           console.log(event.data);
           const data = JSON.parse(event.data);
-          if(Array.isArray(data.extraData)) {
+          console.log(data);
+          const base64payload = JSON.parse(event.data).extraData.data;
+          console.log(base64payload);
+          const payload = atob(base64payload);
+          console.log(payload);
+          const jsonPayload = JSON.parse(payload);
+          console.log(jsonPayload);
+          if(Array.isArray(jsonPayload)) {
             console.log("on message matching");
-            data.extraData.forEach(e => cloneLine(e, document.getElementById('orderList')));
+            jsonPayload.forEach(e => cloneLine(e, document.getElementById('orderList')));
           }
         };
 

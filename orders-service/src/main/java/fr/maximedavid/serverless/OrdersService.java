@@ -96,6 +96,7 @@ public class OrdersService {
                 }).collectItems().asList()
                 .flatMap(res -> {
                     String base64EncodedString = Base64.getEncoder().encodeToString(res.toString().getBytes());
+                    LOG.info(base64EncodedString);
                     return publishMessage(null, "PIZZA_ORDER_LIST_REQUEST_COMPLETED", null, base64EncodedString, true);
                 });
     }
