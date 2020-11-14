@@ -46,14 +46,10 @@ const listenForMessages = async () => {
 				console.log("brodcast !");
 				let bufferOriginal = Buffer.from(message.data);
 				console.log(bufferOriginal);
-				const base64payload = bufferOriginal.toString('utf8')
-				console.log(base64payload);
-				
-				const payload = atob(base64payload);
+				const payload = bufferOriginal.toString('utf8')
 				console.log(payload);
 				const jsonPayload = JSON.parse(payload);
 				console.log(jsonPayload);
-
 				Object.keys(clients).forEach(e => clients[e].write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: jsonPayload})}\n\n`));
 		}
 		else {
