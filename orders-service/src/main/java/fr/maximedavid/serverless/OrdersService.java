@@ -16,6 +16,8 @@ import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.ext.web.client.WebClient;
 import org.jboss.logging.Logger;
 
+import java.util.Base64;
+
 import static com.mongodb.client.model.Filters.eq;
 
 @ApplicationScoped
@@ -92,7 +94,10 @@ public class OrdersService {
                     order.put("status", doc.getString("status"));
                     return order;
                 }).collectItems().asList()
-                .flatMap(res -> publishMessage(null, "PIZZA_ORDER_LIST_REQUEST_COMPLETED", null, res.toString(), true));
+                .flatMap(res -> {
+                    String base64EncodedString = Base64.getEncoder().encodeToString(res.toString().getBytes());
+                    return publishMessage(null, "PIZZA_ORDER_LIST_REQUEST_COMPLETED", null, base64EncodedString, true);
+                });
     }
 
     private ReactiveMongoCollection<Document> getCollection() {
