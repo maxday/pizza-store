@@ -107,7 +107,7 @@ resource "google_cloud_run_service" "manager" {
         }
         env {
           name = "GCP_PUBSUB_TOPIC_PUBLISH_URL"
-          value = var.pubsub_topic
+          value = var.pubsub_topic_manager
         }
         env {
           name = "QUARKUS_TOKEN_MACHINE_SERVICE_ACCOUNT"
@@ -309,7 +309,24 @@ resource "google_pubsub_subscription" "pizza-store-push-sub-check-status" {
     push_endpoint = "${google_cloud_run_service.orders.status[0].url}/orders"
   }
 
-  filter = "attributes.eventId = \"PIZZA_STATUS_REQUEST\" OR attributes.eventId = \"PIZZA_ORDER_LIST_REQUEST\""
+  filter = "attributes.eventId = \"PIZZA_STATUS_REQUEST\""
+}
+
+resource "google_pubsub_subscription" "pizza-store-manager-push-sub-order-list" {
+  name  = "pizza-store-manager-push-sub-order-list"
+  topic = google_pubsub_topic.pizza-store-manager.name
+
+  ack_deadline_seconds = 20
+
+  retry_policy {
+    minimum_backoff = "10s"
+  }
+
+  push_config {
+    push_endpoint = "${google_cloud_run_service.orders.status[0].url}/orders"
+  }
+
+  filter = "attributes.eventId = \"PIZZA_ORDER_LIST_REQUEST\""
 }
 
 resource "google_cloud_run_service_iam_binding" "auth_orders" {
