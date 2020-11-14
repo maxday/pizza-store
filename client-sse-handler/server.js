@@ -44,7 +44,19 @@ const listenForMessages = async () => {
 		else if(jsonData.uuid === "") {
 				//brodcast to managers
 				console.log("brodcast !");
-				Object.keys(clients).forEach(e => clients[e].write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: message.data})}\n\n`));
+
+
+				let bufferOriginal = Buffer.from(JSON.parse(message.data).data);
+				console.log(bufferOriginal);
+				const base64payload = bufferOriginal.toString('utf8')
+				console.log(base64payload);
+				
+				const payload = atob(base64payload);
+				console.log(payload);
+				const jsonPayload = JSON.parse(payload);
+				console.log(jsonPayload);
+
+				Object.keys(clients).forEach(e => clients[e].write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: jsonPayload})}\n\n`));
 		}
 		else {
 			console.log("skipping!");
