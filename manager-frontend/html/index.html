@@ -104,10 +104,11 @@
           console.log(event.data);
           const data = JSON.parse(event.data);
           console.log(data);
-         
-          if(Array.isArray(jsonPayload)) {
+          const extraData = data.extraData;
+          console.log(extraData);
+          if(Array.isArray(extraData)) {
             console.log("on message matching");
-            jsonPayload.forEach(e => cloneLine(e, document.getElementById('orderList')));
+            extraData.forEach(e => cloneLine(e, document.getElementById('orderList')));
           }
         };
 
