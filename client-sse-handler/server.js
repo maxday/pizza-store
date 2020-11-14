@@ -44,9 +44,7 @@ const listenForMessages = async () => {
 		else if(jsonData.uuid === "") {
 				//brodcast to managers
 				console.log("brodcast !");
-
-
-				let bufferOriginal = Buffer.from(message.data.data);
+				let bufferOriginal = Buffer.from(message.data);
 				console.log(bufferOriginal);
 				const base64payload = bufferOriginal.toString('utf8')
 				console.log(base64payload);

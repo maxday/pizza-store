@@ -105,15 +105,6 @@
           const data = JSON.parse(event.data);
           console.log(data);
          
-          let bufferOriginal = Buffer.from(JSON.parse(data.extraData).data);
-          console.log(bufferOriginal);
-          const base64payload = bufferOriginal.toString('utf8')
-          console.log(base64payload);
-          
-          const payload = atob(base64payload);
-          console.log(payload);
-          const jsonPayload = JSON.parse(payload);
-          console.log(jsonPayload);
           if(Array.isArray(jsonPayload)) {
             console.log("on message matching");
             jsonPayload.forEach(e => cloneLine(e, document.getElementById('orderList')));
