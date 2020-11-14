@@ -22,7 +22,6 @@ app.get('/events/:uuid', function (req, res) {
 	(function () {
 		const clientId = req.params.uuid;
 		clients[clientId] = res; 
-		clients[clientId].write("data: " + "connected with serverId = " + uuid + " with clientId = " + clientId + "\n\n"); 
 		req.on("close", function () {
 			delete clients[clientId]
 		});
