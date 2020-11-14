@@ -28,7 +28,7 @@ app.get('/events/:uuid', function (req, res) {
 	})()
 });
 
-const listenForMessages = async () => {
+const listenForMessages = async (isManager) => {
   try {
 	const pubSubClient = new PubSub();
   	const [subscription] = await pubSubClient.topic(process.env.TOPIC_NAME).createSubscription('rand'+Math.random());
@@ -42,6 +42,9 @@ const listenForMessages = async () => {
 			clients[jsonData.uuid].write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: jsonData.extraData})}\n\n`); 
 		}
 		else if(jsonData.uuid === "") {
+			if(jsonData.eventId === "PIZZA_ORDER_LIST_REQUEST") {
+				console.log("SKIP EVENT");
+			} else {
 				//brodcast to managers
 				console.log("brodcast !");
 				let bufferOriginal = Buffer.from(message.data);
@@ -50,7 +53,9 @@ const listenForMessages = async () => {
 				console.log(payload);
 				const jsonPayload = JSON.parse(payload);
 				console.log(jsonPayload);
+
 				Object.keys(clients).forEach(e => clients[e].write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: jsonPayload})}\n\n`));
+			}
 		}
 		else {
 			console.log("skipping!");
@@ -63,6 +68,7 @@ const listenForMessages = async () => {
 	  console.log(e);
   }
 }
+
 
 
 app.listen(process.env.PORT || 9000);
