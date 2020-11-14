@@ -112,7 +112,7 @@
           const extraData = data.extraData;
           console.log(extraData);
           if(Array.isArray(extraData)) {
-            clearOders();
+            clearOrders();
             extraData.forEach(e => cloneLine(e, document.getElementById('orderList')));
           }
         };
