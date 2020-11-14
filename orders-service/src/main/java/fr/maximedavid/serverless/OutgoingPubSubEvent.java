@@ -17,6 +17,7 @@ public class OutgoingPubSubEvent extends JsonObject {
         attributes.put("eventId", eventId);
         attributes.put("extraData", extraData);
         item0.put("attributes", attributes);
+        item0.put("data", body);
     }
 
 }
