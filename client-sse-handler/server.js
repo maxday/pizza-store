@@ -46,7 +46,7 @@ const listenForMessages = async () => {
 				console.log("brodcast !");
 
 
-				let bufferOriginal = Buffer.from(JSON.parse(message.data).data);
+				let bufferOriginal = Buffer.from(message.data.data);
 				console.log(bufferOriginal);
 				const base64payload = bufferOriginal.toString('utf8')
 				console.log(base64payload);
