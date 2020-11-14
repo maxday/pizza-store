@@ -44,6 +44,7 @@
           const clone = document.getElementById('toClone').cloneNode(true);
           clone.id = pizza.uuid;
           clone.classList.remove('hidden');
+          clone.classList.add('generated');
           clone.getElementsByClassName('pizzaOrderID')[0].innerText = `Order #${pizza.uuid}`;
           clone.getElementsByClassName('pizzaDetails')[0].innerText = pizza.name;
           [...clone.getElementsByTagName('button')].forEach(button => button.setAttribute('data-uuid', pizza.uuid));
@@ -99,6 +100,10 @@
           fetchOrders();
         };
 
+        const clearOrders = () => {
+          [...document.getElementsByClassName('generated')].forEach(e => e.remove());
+        }
+
         source.onmessage = event => {
           console.log(event);
           console.log(event.data);
@@ -107,7 +112,7 @@
           const extraData = data.extraData;
           console.log(extraData);
           if(Array.isArray(extraData)) {
-            console.log("on message matching");
+            clearOders();
             extraData.forEach(e => cloneLine(e, document.getElementById('orderList')));
           }
         };
