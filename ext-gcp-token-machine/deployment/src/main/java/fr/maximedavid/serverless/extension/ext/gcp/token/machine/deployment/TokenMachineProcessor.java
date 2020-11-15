@@ -1,12 +1,13 @@
 package fr.maximedavid.serverless.extension.ext.gcp.token.machine.deployment;
 
-import com.google.inject.Singleton;
 import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachine;
 import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachineConfig;
 import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachineRecorder;
 import io.quarkus.arc.deployment.*;
 import io.quarkus.deployment.annotations.*;
 import org.jboss.logging.Logger;
+
+import javax.inject.Singleton;
 
 import static io.quarkus.deployment.annotations.ExecutionTime.RUNTIME_INIT;
 import static io.quarkus.deployment.annotations.ExecutionTime.STATIC_INIT;
