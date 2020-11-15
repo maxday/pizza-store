@@ -13,4 +13,10 @@ public interface GCPConfiguration { ;
 
     @ConfigProperty(defaultValue = "443")
     int getPubsubApiPort();
+
+    @ConfigProperty(defaultValue = "pizzaStore")
+    String getDatabaseName();
+
+    @ConfigProperty(defaultValue = "orders")
+    String getCollectionName();
 }

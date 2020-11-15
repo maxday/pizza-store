@@ -40,35 +40,35 @@ public class OrdersService {
         String eventId = pubSubEvent.getMessage().getAttributes().getEventId();
         String uuid = pubSubEvent.getMessage().getAttributes().getUuid();
         String name = pubSubEvent.getMessage().getAttributes().getName();
-        LOG.info("RECEIVED UUID = " + uuid + " AND EVENTID = " + eventId);
-
-        if("PIZZA_ORDER_REQUEST".equals(eventId)) {
-            LOG.info("in switch for PIZZA_ORDER_REQUEST");
+        LOG.info("Received eventId = " + eventId + " with uuid = " + uuid);
+        if(PizzaEvent.PIZZA_ORDER_REQUEST.getEvent().equals(eventId)) {
             return handlePizzaCreationRequest(uuid, name);
-        } else if ("PIZZA_PREPARED_REQUEST".equals(eventId)
-                || "PIZZA_BAKED_REQUEST".equals(eventId)
-                || "PIZZA_LEFT_STORE_REQUEST".equals(eventId)
-                || "PIZZA_DELIVERED_REQUEST".equals(eventId)) {
+        } else if (PizzaEvent.PIZZA_PREPARED_REQUEST.getEvent().equals(eventId)
+                || PizzaEvent.PIZZA_BAKED_REQUEST.getEvent().equals(eventId)
+                || PizzaEvent.PIZZA_LEFT_STORE_REQUEST.getEvent().equals(eventId)
+                || PizzaEvent.PIZZA_DELIVERED_REQUEST.getEvent().equals(eventId)) {
+            LOG.info("Change status handler");
             return handlePizzaChangeStatusRequest(uuid, eventId);
-        } else if("PIZZA_STATUS_REQUEST".equals(eventId)) {
+        } else if(PizzaEvent.PIZZA_STATUS_REQUEST.getEvent().equals(eventId)) {
+            LOG.info("Get status handler");
             return handlePizzaStatusRequest(uuid, eventId);
-        } else if("PIZZA_ORDER_LIST_REQUEST".equals(eventId)) {
+        } else if(PizzaEvent.PIZZA_ORDER_LIST_REQUEST.getEvent().equals(eventId)) {
+            LOG.info("List order handler");
             return handlePizzaOrderListRequest();
         }
         else {
+            LOG.info("Unknown event, skipping");
             return Uni.createFrom().nullItem();
         }
     }
 
     private Uni<JsonObject> handlePizzaCreationRequest(String uuid, String name) {
-        LOG.info("handlePizzaCreationRequest uuid = " + uuid);
-        LOG.info("handlePizzaCreationRequest name = " + name);
         Document document = new Document()
                 .append("uuid", uuid)
                 .append("name", name)
-                .append("status", "PIZZA_ORDERED");
+                .append("status", PizzaEvent.PIZZA_ORDERED.getEvent());
         return getCollection().insertOne(document)
-                .flatMap(res -> publishMessage(uuid, "PIZZA_ORDERED", null, null, false))
+                .flatMap(res -> publishMessage(uuid, PizzaEvent.PIZZA_ORDERED.getEvent(), null, null, false))
                 .flatMap(res -> handlePizzaOrderListRequest());
     }
 
@@ -77,14 +77,16 @@ public class OrdersService {
                 .find(eq("uuid", uuid))
                 .map(doc -> doc.getString("status"))
                 .collectItems()
-                .first().flatMap(res -> publishMessage(uuid, "PIZZA_STATUS_REQUEST_COMPLETED", res, null, false));
+                .first().flatMap(res ->
+                        publishMessage(uuid, PizzaEvent.PIZZA_STATUS_REQUEST_COMPLETED.getEvent(),
+                                res, null, false));
     }
 
     private Uni<JsonObject> handlePizzaChangeStatusRequest(String uuid, String eventId) {
-        LOG.info("handlePizzaChangeStatusRequest uuid = " + uuid);
-        LOG.info("handlePizzaChangeStatusRequest eventId = " + eventId);
         String newEventId = eventId.replace("_REQUEST", "");
-        return getCollection().updateOne(eq("uuid", uuid), new Document("$set", new Document("status", newEventId))).flatMap(res -> publishMessage(uuid, newEventId, null, null, false));
+        return getCollection().updateOne(eq("uuid", uuid),
+                new Document("$set", new Document("status", newEventId)))
+                .flatMap(res -> publishMessage(uuid, newEventId, null, null, false));
     }
 
     public Uni<JsonObject> handlePizzaOrderListRequest() {
@@ -98,13 +100,9 @@ public class OrdersService {
                 }).collectItems().asList()
                 .flatMap(res -> {
                     String base64EncodedString = Base64.getEncoder().encodeToString(res.toString().getBytes());
-                    LOG.info(base64EncodedString);
-                    return publishMessage(null, "PIZZA_ORDER_LIST_REQUEST_COMPLETED", null, base64EncodedString, true);
+                    return publishMessage(null, PizzaEvent.PIZZA_ORDER_LIST_REQUEST_COMPLETED.getEvent(),
+                            null, base64EncodedString, true);
                 });
-    }
-
-    private ReactiveMongoCollection<Document> getCollection() {
-        return mongoClient.getDatabase("pizzaStore").getCollection("orders");
     }
 
     public Uni<JsonObject> publishMessage(String uuid, String eventId, String extraData, String body, boolean isManagerTopic) {
@@ -120,16 +118,20 @@ public class OrdersService {
                 .sendJsonObject(pubSubEvent)
                 .onItem().transform(resp -> {
                     if (resp.statusCode() == 200) {
-                        LOG.info("200");
+                        LOG.info("Successfully sent message on topic" + configuration.getPubsubApiHost());
                         return null;
                     } else {
-                        LOG.info("NOT OK 200");
-                        LOG.info(resp.bodyAsString());
+                        LOG.error("Impossible to send message on topic" + configuration.getPubsubApiHost() + " error = " + resp.bodyAsString());
                         return new JsonObject()
                                 .put("code", resp.statusCode())
                                 .put("message", resp.bodyAsString());
                     }
                 });
+    }
+
+    private ReactiveMongoCollection<Document> getCollection() {
+        return mongoClient.getDatabase(configuration.getDatabaseName())
+                .getCollection(configuration.getCollectionName());
     }
 
 }
