@@ -1,41 +1,15 @@
 package fr.maximedavid.serverless;
 
-public class PizzaEvent {
+public enum PizzaEvent {
+    PIZZA_ORDER_LIST_REQUEST("PIZZA_ORDER_LIST_REQUEST");
 
-    private String uuid;
-    private String eventId;
-    private String name;
+    private String event;
 
-    public PizzaEvent() {
+    PizzaEvent(String event) {
+        this.event = event;
     }
 
-    public PizzaEvent(String uuid, String eventId, String name) {
-        this.uuid = uuid;
-        this.eventId = eventId;
-        this.name = name;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    public String getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(String eventId) {
-        this.eventId = eventId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public String getEvent() {
+        return event;
     }
 }

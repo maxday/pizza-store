@@ -106,8 +106,12 @@ resource "google_cloud_run_service" "manager" {
           value = var.mongo_connexion_string
         }
         env {
-          name = "GCP_PUBSUB_TOPIC_PUBLISH_URL"
+          name = "GCP_PUBSUB_MANAGER_TOPIC_PUBLISH_URL"
           value = var.pubsub_manager_topic
+        }
+        env {
+          name = "GCP_PUBSUB_TOPIC_PUBLISH_URL"
+          value = var.pubsub_topic
         }
         env {
           name = "QUARKUS_TOKEN_MACHINE_SERVICE_ACCOUNT"
