@@ -1,5 +1,6 @@
 package fr.maximedavid.serverless;
 
+import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachine;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -23,36 +24,51 @@ public class ClientOrdersService {
     Vertx vertx;
 
     @Inject
+    TokenMachine tokenMachine;
+
+    @Inject
     GCPConfiguration configuration;
 
     public Uni<JsonObject> createOrder(PizzaOrder pizzaOrder) {
         LOG.info("Creating pizza with uuid " + pizzaOrder.getUuid() );
-        return publishMessage(pizzaOrder.getUuid(), PizzaEvent.PIZZA_ORDER_REQUEST.getEvent(), pizzaOrder.getName());
+        return publishMessage(pizzaOrder.getUuid(), PizzaEvent.PIZZA_ORDER_REQUEST.getEvent(), pizzaOrder.getName(), true);
     }
 
     public Uni<JsonObject> get(String uuid) {
         LOG.info("Get pizza status with uuid " + uuid);
-        return publishMessage(uuid, PizzaEvent.PIZZA_STATUS_REQUEST.getEvent(), null);
+        return publishMessage(uuid, PizzaEvent.PIZZA_STATUS_REQUEST.getEvent(), null, true);
     }
 
-    public Uni<JsonObject> publishMessage(String uuid, String eventName, String name) {
+    public Uni<JsonObject> publishMessage(String uuid, String eventName, String name, boolean retry) {
         String token = System.getProperty("access.token");
         PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventName, name);
         this.webclient = WebClient.create(vertx,
                 new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(configuration.getPubsubApiPort()).setSsl(configuration.getPubsubApiPort() == 443));
         return this.webclient
                 .post(configuration.getPubsubTopicPublishUrl())
-                .bearerTokenAuthentication(token)
+                .bearerTokenAuthentication(tokenMachine.getAccessToken())
                 .sendJsonObject(pubSubEvent)
-                .onItem().transform(resp -> {
+                .flatMap(resp -> {
+                    Uni<Boolean> toReturn = Uni.createFrom().item(false);
                     if (resp.statusCode() == 200) {
-                        LOG.info("Successfully sent message on topic" + configuration.getPubsubApiHost());
-                        return null;
+                        LOG.info("Successfully sent message on topic" + configuration.getPubsubTopicPublishUrl());
                     } else {
-                        LOG.error("Impossible to send message on topic" + configuration.getPubsubApiHost() + " error = " + resp.bodyAsString());
-                        return new JsonObject()
-                                .put("code", resp.statusCode())
-                                .put("message", resp.bodyAsString());
+                        LOG.info("Impossible to send the message" + configuration.getPubsubTopicPublishUrl());
+                        LOG.info("Retry = " + retry);
+                        if (retry) {
+                            toReturn = tokenMachine.setAccessToken(vertx);
+                        }
+                    }
+                    return toReturn;
+                })
+                .flatMap(shouldRetry -> {
+                    LOG.info("In shouldRetry = " + retry);
+                    if (shouldRetry) {
+                        LOG.info("RETRY");
+                        return publishMessage(uuid, eventName, name,  false);
+                    } else {
+                        LOG.info("PAS DE RETRY");
+                        return Uni.createFrom().nullItem();
                     }
                 });
     }

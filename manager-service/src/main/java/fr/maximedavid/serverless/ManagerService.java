@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.mutiny.core.Vertx;
 
 import io.vertx.ext.web.client.WebClientOptions;
+
 import io.vertx.mutiny.ext.web.client.WebClient;
 import org.jboss.logging.Logger;
 
@@ -30,19 +31,14 @@ public class ManagerService {
     private static final Logger LOG = Logger.getLogger(ManagerService.class);
 
     public Uni<JsonObject> setStatus(Pizza pizza) {
-        return publishMessage(pizza.getUuid(), pizza.getEventId(), false);
+        return publishMessage(pizza.getUuid(), pizza.getEventId(), false, true);
     }
 
     public Uni<JsonObject> listOrders() {
-        LOG.info(tokenMachine);
-        LOG.info(tokenMachine.getAccessToken());
-        LOG.info(tokenMachine.getApiHost());
-        tokenMachine.setAccessToken(vertx).await().indefinitely();
-        return publishMessage(null, PizzaEvent.PIZZA_ORDER_LIST_REQUEST.getEvent(), true);
+        return publishMessage(null, PizzaEvent.PIZZA_ORDER_LIST_REQUEST.getEvent(), true, true);
     }
 
-
-    public Uni<JsonObject> publishMessage(String uuid, String eventId, boolean isManager) {
+    public Uni<JsonObject> publishMessage(String uuid, String eventId, boolean isManager, boolean retry) {
         LOG.info("ACCESS TOKEN = " + tokenMachine.getAccessToken());
         PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventId);
         String topicUrl = isManager ? configuration.getPubsubManagerTopicPublishUrl() : configuration.getPubsubTopicPublishUrl();
@@ -53,15 +49,27 @@ public class ManagerService {
                 .post(topicUrl)
                 .bearerTokenAuthentication(tokenMachine.getAccessToken())
                 .sendJsonObject(pubSubEvent)
-                .onItem().transform(resp -> {
+                .flatMap(resp -> {
+                    Uni<Boolean> toReturn = Uni.createFrom().item(false);
                     if (resp.statusCode() == 200) {
                         LOG.info("Successfully sent message on topic" + topicUrl);
-                        return null;
                     } else {
-                        LOG.error("Impossible to send message on topic" + topicUrl + " error = " + resp.bodyAsString());
-                        return new JsonObject()
-                                .put("code", resp.statusCode())
-                                .put("message", resp.bodyAsString());
+                        LOG.info("Impossible to send the message" + topicUrl);
+                        LOG.info("Retry = " + retry);
+                        if(retry) {
+                            toReturn = tokenMachine.setAccessToken(vertx);
+                        }
+                    }
+                    return toReturn;
+                })
+                .flatMap(shouldRetry -> {
+                    LOG.info("In shouldRetry = " + retry);
+                    if(shouldRetry) {
+                        LOG.info("RETRY");
+                        return publishMessage(uuid, eventId, isManager, false);
+                    } else {
+                        LOG.info("PAS DE RETRY");
+                        return Uni.createFrom().nullItem();
                     }
                 });
     }

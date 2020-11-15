@@ -21,7 +21,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-@Superior
 @ApplicationScoped
 public class TokenMachine {
 
@@ -89,7 +88,7 @@ public class TokenMachine {
         }
     }
 
-    public Uni<JsonObject> setAccessToken(io.vertx.mutiny.core.Vertx vertx) {
+    public Uni<Boolean> setAccessToken(io.vertx.mutiny.core.Vertx vertx) {
         String jwt = generateJwt();
         WebClient webclient = WebClient.create(vertx,
                 new WebClientOptions()
@@ -109,15 +108,14 @@ public class TokenMachine {
                         if (null != accessToken) {
                             this.accessToken = accessToken;
                             LOG.info("Successfully set the access_token");
+                            return true;
                         } else {
                             LOG.error("Error while getting an access_token");
+                            return false;
                         }
-                        return null;
                     } else {
                         LOG.error("error = " + resp.bodyAsString());
-                        return new JsonObject()
-                                .put("code", resp.statusCode())
-                                .put("message", resp.bodyAsString());
+                        return false;
                     }
                 });
     }

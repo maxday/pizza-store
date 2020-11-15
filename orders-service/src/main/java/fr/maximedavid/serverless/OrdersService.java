@@ -1,5 +1,6 @@
 package fr.maximedavid.serverless;
 
+import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachine;
 import io.quarkus.mongodb.reactive.ReactiveMongoClient;
 import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
 import io.smallrye.mutiny.Uni;
@@ -33,6 +34,9 @@ public class OrdersService {
 
     @Inject
     ReactiveMongoClient mongoClient;
+
+    @Inject
+    TokenMachine tokenMachine;
 
     private static final Logger LOG = Logger.getLogger(OrdersService.class);
 
@@ -68,7 +72,7 @@ public class OrdersService {
                 .append("name", name)
                 .append("status", PizzaEvent.PIZZA_ORDERED.getEvent());
         return getCollection().insertOne(document)
-                .flatMap(res -> publishMessage(uuid, PizzaEvent.PIZZA_ORDERED.getEvent(), null, null, false))
+                .flatMap(res -> publishMessage(uuid, PizzaEvent.PIZZA_ORDERED.getEvent(), null, null, false, true))
                 .flatMap(res -> handlePizzaOrderListRequest());
     }
 
@@ -79,14 +83,14 @@ public class OrdersService {
                 .collectItems()
                 .first().flatMap(res ->
                         publishMessage(uuid, PizzaEvent.PIZZA_STATUS_REQUEST_COMPLETED.getEvent(),
-                                res, null, false));
+                                res, null, false, true));
     }
 
     private Uni<JsonObject> handlePizzaChangeStatusRequest(String uuid, String eventId) {
         String newEventId = eventId.replace("_REQUEST", "");
         return getCollection().updateOne(eq("uuid", uuid),
                 new Document("$set", new Document("status", newEventId)))
-                .flatMap(res -> publishMessage(uuid, newEventId, null, null, false));
+                .flatMap(res -> publishMessage(uuid, newEventId, null, null, false, true));
     }
 
     public Uni<JsonObject> handlePizzaOrderListRequest() {
@@ -101,11 +105,11 @@ public class OrdersService {
                 .flatMap(res -> {
                     String base64EncodedString = Base64.getEncoder().encodeToString(res.toString().getBytes());
                     return publishMessage(null, PizzaEvent.PIZZA_ORDER_LIST_REQUEST_COMPLETED.getEvent(),
-                            null, base64EncodedString, true);
+                            null, base64EncodedString, true, true);
                 });
     }
 
-    public Uni<JsonObject> publishMessage(String uuid, String eventId, String extraData, String body, boolean isManagerTopic) {
+    public Uni<JsonObject> publishMessage(String uuid, String eventId, String extraData, String body, boolean isManagerTopic, boolean retry) {
         LOG.info("publishMessage");
         String token = System.getProperty("access.token");
         String topicPath = isManagerTopic ? configuration.getPubsubManagerTopicPublishUrl() : configuration.getPubsubTopicPublishUrl();
@@ -114,17 +118,29 @@ public class OrdersService {
                 new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(configuration.getPubsubApiPort()).setSsl(configuration.getPubsubApiPort() == 443));
         return this.webclient
                 .post(topicPath)
-                .bearerTokenAuthentication(token)
+                .bearerTokenAuthentication(tokenMachine.getAccessToken())
                 .sendJsonObject(pubSubEvent)
-                .onItem().transform(resp -> {
+                .flatMap(resp -> {
+                    Uni<Boolean> toReturn = Uni.createFrom().item(false);
                     if (resp.statusCode() == 200) {
-                        LOG.info("Successfully sent message on topic" + configuration.getPubsubApiHost());
-                        return null;
+                        LOG.info("Successfully sent message on topic" + topicPath);
                     } else {
-                        LOG.error("Impossible to send message on topic" + configuration.getPubsubApiHost() + " error = " + resp.bodyAsString());
-                        return new JsonObject()
-                                .put("code", resp.statusCode())
-                                .put("message", resp.bodyAsString());
+                        LOG.info("Impossible to send the message" + topicPath);
+                        LOG.info("Retry = " + retry);
+                        if (retry) {
+                            toReturn = tokenMachine.setAccessToken(vertx);
+                        }
+                    }
+                    return toReturn;
+                })
+                .flatMap(shouldRetry -> {
+                    LOG.info("In shouldRetry = " + retry);
+                    if (shouldRetry) {
+                        LOG.info("RETRY");
+                        return publishMessage(uuid, eventId, extraData, body, isManagerTopic, false);
+                    } else {
+                        LOG.info("PAS DE RETRY");
+                        return Uni.createFrom().nullItem();
                     }
                 });
     }
