@@ -6,7 +6,8 @@ import java.util.Map;
 
 public class PubSubResource implements QuarkusTestResourceLifecycleManager {
 
-    public static PubSubContainer pubsub = new PubSubContainer("gcr.io/google.com/cloudsdktool/cloud-sdk:316.0.0-emulators");
+    public static PubSubContainer pubsub =
+            new PubSubContainer("gcr.io/google.com/cloudsdktool/cloud-sdk:316.0.0-emulators");
 
     @Override
     public Map<String, String> start() {

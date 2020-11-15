@@ -2,8 +2,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 
 public class PubSubContainer extends GenericContainer<org.testcontainers.containers.PubSubEmulatorContainer> {
-    private static final String CMD = "gcloud beta emulators pubsub start --host-port 0.0.0.0:8085";
-    private static final int PORT = 8085;
 
     public PubSubContainer(String dockerImageName) {
         super(dockerImageName);
