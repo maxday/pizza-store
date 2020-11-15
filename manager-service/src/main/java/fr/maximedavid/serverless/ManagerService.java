@@ -1,5 +1,6 @@
 package fr.maximedavid.serverless;
 
+import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachine;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -22,6 +23,9 @@ public class ManagerService {
     @Inject
     GCPConfiguration configuration;
 
+    @Inject
+    TokenMachine tokenMachine;
+
     private WebClient webclient;
     private static final Logger LOG = Logger.getLogger(ManagerService.class);
 
@@ -30,20 +34,24 @@ public class ManagerService {
     }
 
     public Uni<JsonObject> listOrders() {
+        LOG.info(tokenMachine);
+        LOG.info(tokenMachine.getAccessToken());
+        LOG.info(tokenMachine.getApiHost());
+        tokenMachine.setAccessToken(vertx).await().indefinitely();
         return publishMessage(null, PizzaEvent.PIZZA_ORDER_LIST_REQUEST.getEvent(), true);
     }
 
 
     public Uni<JsonObject> publishMessage(String uuid, String eventId, boolean isManager) {
+        LOG.info("ACCESS TOKEN = " + tokenMachine.getAccessToken());
         PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventId);
         String topicUrl = isManager ? configuration.getPubsubManagerTopicPublishUrl() : configuration.getPubsubTopicPublishUrl();
-        String token = System.getProperty("access.token");
         LOG.info("Sending : " + pubSubEvent);
         this.webclient = WebClient.create(vertx,
                 new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(configuration.getPubsubApiPort()).setSsl(configuration.getPubsubApiPort() == 443));
         return this.webclient
                 .post(topicUrl)
-                .bearerTokenAuthentication(token)
+                .bearerTokenAuthentication(tokenMachine.getAccessToken())
                 .sendJsonObject(pubSubEvent)
                 .onItem().transform(resp -> {
                     if (resp.statusCode() == 200) {
