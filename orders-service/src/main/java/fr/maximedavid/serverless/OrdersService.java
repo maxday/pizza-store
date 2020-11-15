@@ -67,7 +67,9 @@ public class OrdersService {
                 .append("uuid", uuid)
                 .append("name", name)
                 .append("status", "PIZZA_ORDERED");
-        return getCollection().insertOne(document).flatMap(res -> publishMessage(uuid, "PIZZA_ORDERED", null, null, false));
+        return getCollection().insertOne(document)
+                .flatMap(res -> publishMessage(uuid, "PIZZA_ORDERED", null, null, false))
+                .flatMap(res -> handlePizzaOrderListRequest());
     }
 
     private Uni<JsonObject> handlePizzaStatusRequest(String uuid, String name) {
