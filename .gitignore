@@ -6,3 +6,7 @@ extension-token-machine/deployment/target
 manager-service/.idea
 client-orders/.idea
 manager-service/.idea
+terraform/terraform
+terraform/.terraform
+terraform/variables.tf
+terraform/terraform.tfstate*

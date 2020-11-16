@@ -40,7 +40,6 @@ public class ClientOrdersService {
     }
 
     public Uni<JsonObject> publishMessage(String uuid, String eventName, String name, boolean retry) {
-        String token = System.getProperty("access.token");
         PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventName, name);
         this.webclient = WebClient.create(vertx,
                 new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(configuration.getPubsubApiPort()).setSsl(configuration.getPubsubApiPort() == 443));
