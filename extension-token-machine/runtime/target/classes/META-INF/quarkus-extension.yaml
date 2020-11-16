@@ -1,6 +1,0 @@
----
-metadata: {}
-group-id: "fr.maximedavid.serverless.extension"
-artifact-id: "ext-gcp-token-machine"
-version: "1.0-SNAPSHOT"
-name: "GCP Token Machine - Runtime"

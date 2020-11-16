@@ -10,3 +10,4 @@ terraform/terraform
 terraform/.terraform
 terraform/variables.tf
 terraform/terraform.tfstate*
+pizza-store/extension-token-machine/.idea/
