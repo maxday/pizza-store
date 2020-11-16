@@ -1,1 +1,1 @@
-# orders-service project
+# orders-api
