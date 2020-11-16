@@ -1,1 +1,1 @@
-# manager-service project
+# manager-orders-api
