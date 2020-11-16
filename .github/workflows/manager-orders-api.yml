@@ -1,8 +1,8 @@
-name: 'Dockerize manager-service'
+name: 'Dockerize manager-orders-api'
 on:
   push:
     paths:
-    - 'manager-service/**'
+    - 'manager-orders-api/**'
 
 jobs:
   build-and-deploy:
@@ -12,9 +12,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build native
-        run: cd manager-service && ./mvnw -f ../ext-gcp-token-machine install && ./mvnw package -Pnative -Dquarkus.native.container-build=true 
+        run: cd manager-orders-api && ./mvnw -f ../extension-token-machine install && ./mvnw package -Pnative -Dquarkus.native.container-build=true 
       - name: Build docker
-        run: cd manager-service && docker build -f src/main/docker/Dockerfile.native -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/manager-service .
+        run: cd manager-orders-api && docker build -f src/main/docker/Dockerfile.native -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/manager-orders-api .
       - name: Login to GCP
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
@@ -24,4 +24,4 @@ jobs:
       - name: Push the Docker image to GCP
         run: |
           gcloud auth configure-docker --quiet
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/manager-service
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/manager-orders-api
