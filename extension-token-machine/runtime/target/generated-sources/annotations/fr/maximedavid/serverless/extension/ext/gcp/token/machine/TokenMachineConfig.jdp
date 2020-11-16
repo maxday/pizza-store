@@ -1,0 +1,8 @@
+#
+#Sun Nov 15 15:41:10 EST 2020
+fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachineConfig.apiHost=API host.
+fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachineConfig.audience=Token audience.
+fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachineConfig.apiPath=API path.
+fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachineConfig.serviceAccount=Service account (base64).
+fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachineConfig.scope=Token scope.
+fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachineConfig.expiryLength=Token lifetime in seconds.

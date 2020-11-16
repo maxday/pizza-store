@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="e0dc21b9-8749-444b-bed9-dd746d4af35b" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="1kDfKVfDYOaYtuww5GeCPmqp1pq" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/runtime/src/main/java/fr/maximedavid/serverless/extension/ext/gcp/token/machine" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/runtime/src/main/java/fr/maximedavid/serverless/extension/ext/gcp/token/machine" />
+      <recent name="$PROJECT_DIR$/deployment/src/main/java/fr/maximedavid/serverless/extension/ext/gcp/token/machine/deployment" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="fr.maximedavid.serverless.extension.ext.gcp.token.machine.deployment" />
+    </key>
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="fr.maximedavid.serverless.extension.ext.gcp.token.machine.deployment" />
+      <recent name="fr.maximedavid.serverless.extension.ext.gcp.token.machine" />
+    </key>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e0dc21b9-8749-444b-bed9-dd746d4af35b" name="Default Changelist" comment="" />
+      <created>1605240018731</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1605240018731</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="458" y="192" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1605470381791">
+      <screen x="0" y="23" width="1440" height="831" />
+    </state>
+    <state x="458" y="192" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.23.1440.831@0.23.1440.831" timestamp="1605470381791" />
+    <state x="378" y="195" width="893" height="486" key="find.popup" timestamp="1605480286350">
+      <screen x="0" y="23" width="1440" height="831" />
+    </state>
+    <state x="378" y="195" width="893" height="486" key="find.popup/0.23.1440.831@0.23.1440.831" timestamp="1605480286350" />
+    <state x="426" y="52" key="refactoring.ChangeSignatureDialog" timestamp="1605246005952">
+      <screen x="0" y="23" width="1440" height="831" />
+    </state>
+    <state x="426" y="52" key="refactoring.ChangeSignatureDialog/0.23.1440.831@0.23.1440.831" timestamp="1605246005952" />
+  </component>
+</project>
