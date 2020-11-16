@@ -1,6 +1,6 @@
 variable "project_id" {
     type  = string
-    default = "techday-pizza-store"
+    default = "techday-pizza-store-demo"
 }
 
 variable "service_account" {
@@ -15,9 +15,9 @@ variable "mongo_connexion_string" {
 
 variable "pubsub_topic" {
     type  = string
-    default = "/v1/projects/techday-pizza-store/topics/pizza-store:publish"
+    default = "/v1/projects/techday-pizza-store-demo/topics/pizza-store:publish"
 }
 variable "pubsub_manager_topic" {
     type  = string
-    default = "/v1/projects/techday-pizza-store/topics/pizza-store-manager:publish"
+    default = "/v1/projects/techday-pizza-store-demo/topics/pizza-store-manager:publish"
 }

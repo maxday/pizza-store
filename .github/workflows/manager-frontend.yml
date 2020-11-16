@@ -3,6 +3,7 @@ on:
   push:
     paths:
     - 'manager-frontend/**'
+    - 'buildAll'
 
 jobs:
   build-and-deploy:

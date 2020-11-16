@@ -3,6 +3,7 @@ on:
   push:
     paths:
     - 'sse-handler/**'
+    - 'buildAll'
 
 jobs:
   build-and-deploy:

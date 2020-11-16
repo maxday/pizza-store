@@ -3,6 +3,7 @@ on:
   push:
     paths:
     - 'manager-orders-api/**'
+    - 'buildAll'
 
 jobs:
   build-and-deploy:
