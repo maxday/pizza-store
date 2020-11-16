@@ -44,6 +44,7 @@
           const clone = document.getElementById('toClone').cloneNode(true);
           clone.id = pizza.uuid;
           clone.classList.remove('hidden');
+          clone.classList.add('generated');
           clone.getElementsByClassName('pizzaOrderID')[0].innerText = `Order #${pizza.uuid}`;
           clone.getElementsByClassName('pizzaDetails')[0].innerText = pizza.name;
           [...clone.getElementsByTagName('button')].forEach(button => button.setAttribute('data-uuid', pizza.uuid));
@@ -58,8 +59,8 @@
                 'Content-Type': 'application/json'
               }
             });
-            const result = await response.json();
-            result.forEach(e => cloneLine(e, document.getElementById('orderList')));
+            const result = response.status;
+            console.log(result);
           })().catch(err => {
             console.error(err);
           });
@@ -85,7 +86,38 @@
             console.error(err);
           });
         }
-        fetchOrders();
+
+        const uuidv4 = () => {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            // thanks ! https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid
+        }
+
+        const source = new EventSource(`/events/${uuidv4()}`);
+        source.onopen = event => {
+          fetchOrders();
+        };
+
+        const clearOrders = () => {
+          [...document.getElementsByClassName('generated')].forEach(e => e.remove());
+        }
+
+        source.onmessage = event => {
+          console.log(event);
+          console.log(event.data);
+          const data = JSON.parse(event.data);
+          console.log(data);
+          const extraData = data.extraData;
+          console.log(extraData);
+          if(Array.isArray(extraData)) {
+            clearOrders();
+            extraData.forEach(e => cloneLine(e, document.getElementById('orderList')));
+          }
+        };
+
+      
     </script>
   </body>
 </html>

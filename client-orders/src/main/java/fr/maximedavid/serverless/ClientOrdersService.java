@@ -1,7 +1,6 @@
 package fr.maximedavid.serverless;
 
-import io.quarkus.mongodb.reactive.ReactiveMongoClient;
-import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
+import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachine;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -12,10 +11,7 @@ import io.vertx.mutiny.core.Vertx;
 
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.ext.web.client.WebClient;
-import org.bson.Document;
 import org.jboss.logging.Logger;
-
-import static com.mongodb.client.model.Filters.eq;
 
 @ApplicationScoped
 public class ClientOrdersService {
@@ -25,51 +21,54 @@ public class ClientOrdersService {
     private static final Logger LOG = Logger.getLogger(ClientOrdersService.class);
 
     @Inject
-    ReactiveMongoClient mongoClient;
+    Vertx vertx;
 
     @Inject
-    Vertx vertx;
+    TokenMachine tokenMachine;
 
     @Inject
     GCPConfiguration configuration;
 
     public Uni<JsonObject> createOrder(PizzaOrder pizzaOrder) {
-        return publishMessage(pizzaOrder.getUuid(), pizzaOrder.getName());
+        LOG.info("Creating pizza with uuid " + pizzaOrder.getUuid() );
+        return publishMessage(pizzaOrder.getUuid(), PizzaEvent.PIZZA_ORDER_REQUEST.getEvent(), pizzaOrder.getName(), true);
     }
 
     public Uni<JsonObject> get(String uuid) {
-        return getCollection()
-                .find(eq("uuid", uuid))
-                .map(doc -> new JsonObject().put("status", doc.getString("status")))
-                .collectItems()
-                .first();
+        LOG.info("Get pizza status with uuid " + uuid);
+        return publishMessage(uuid, PizzaEvent.PIZZA_STATUS_REQUEST.getEvent(), null, true);
     }
 
-    private ReactiveMongoCollection<Document> getCollection() {
-        return mongoClient.getDatabase("pizzaStore").getCollection("orders");
-    }
-
-    public Uni<JsonObject> publishMessage(String uuid, String name) {
+    public Uni<JsonObject> publishMessage(String uuid, String eventName, String name, boolean retry) {
         String token = System.getProperty("access.token");
-        LOG.info(token);
-        PubSubEvent pubSubEvent = new PubSubEvent(uuid, "PIZZA_ORDER_REQUEST", name);
-        System.out.println(pubSubEvent);
+        PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventName, name);
         this.webclient = WebClient.create(vertx,
-                new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(443).setSsl(true));
+                new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(configuration.getPubsubApiPort()).setSsl(configuration.getPubsubApiPort() == 443));
         return this.webclient
                 .post(configuration.getPubsubTopicPublishUrl())
-                .bearerTokenAuthentication(token)
+                .bearerTokenAuthentication(tokenMachine.getAccessToken())
                 .sendJsonObject(pubSubEvent)
-                    .onItem().transform(resp -> {
-                    System.out.println("resp");
+                .flatMap(resp -> {
+                    Uni<Boolean> toReturn = Uni.createFrom().item(false);
                     if (resp.statusCode() == 200) {
-                        System.out.println("200 OK");
-                        return null;
+                        LOG.info("Successfully sent message on topic" + configuration.getPubsubTopicPublishUrl());
                     } else {
-                        System.out.println("pas 200 KO" + resp.bodyAsString());
-                        return new JsonObject()
-                                .put("code", resp.statusCode())
-                                .put("message", resp.bodyAsString());
+                        LOG.info("Impossible to send the message" + configuration.getPubsubTopicPublishUrl());
+                        LOG.info("Retry = " + retry);
+                        if (retry) {
+                            toReturn = tokenMachine.setAccessToken(vertx);
+                        }
+                    }
+                    return toReturn;
+                })
+                .flatMap(shouldRetry -> {
+                    LOG.info("In shouldRetry = " + retry);
+                    if (shouldRetry) {
+                        LOG.info("RETRY");
+                        return publishMessage(uuid, eventName, name,  false);
+                    } else {
+                        LOG.info("PAS DE RETRY");
+                        return Uni.createFrom().nullItem();
                     }
                 });
     }

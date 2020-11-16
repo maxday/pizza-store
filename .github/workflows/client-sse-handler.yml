@@ -1,19 +1,14 @@
-name: 'Dockerize client-frontend'
+name: 'Dockerize sse-handler'
 on:
   push:
     paths:
-    - 'client-frontend/**'
+    - 'client-sse-handler/**'
 
 jobs:
   build-and-deploy:
     name: Build and deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Check Commit Type
-        uses: gsactions/commit-message-checker@v1
-        with:
-          pattern: '(.*)client-sse-handler(.*)'
-          error: 'No need to continue'
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build docker
