@@ -6,8 +6,10 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 
 import io.smallrye.mutiny.Uni;
+
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
+import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.ext.web.client.WebClient;
 
 import io.vertx.mutiny.ext.web.multipart.MultipartForm;
@@ -37,10 +39,7 @@ public class TokenMachine {
 
     private static final Logger LOG = Logger.getLogger(TokenMachine.class);
 
-    public TokenMachine() {
-    }
-
-    public void setConfig(TokenMachineConfig config) {
+    public TokenMachine(TokenMachineConfig config) {
         this.audience = config.audience;
         this.expiryLength = config.expiryLength;
         this.apiHost = config.apiHost;
@@ -79,7 +78,7 @@ public class TokenMachine {
         }
     }
 
-    public Uni<String> getAccessToken(io.vertx.mutiny.core.Vertx vertx) {
+    public Uni<String> getAccessToken(Vertx vertx) {
         if(null == this.accessToken) {
             LOG.info("Token is null, fetching a new one");
             return this.setAccessToken(vertx).flatMap(res -> Uni.createFrom().item(this.accessToken));
@@ -94,7 +93,7 @@ public class TokenMachine {
         }
     }
 
-    private Uni<Boolean> setAccessToken(io.vertx.mutiny.core.Vertx vertx) {
+    private Uni<Boolean> setAccessToken(Vertx vertx) {
         String jwt = generateJwt();
         WebClient webclient = WebClient.create(vertx,
                 new WebClientOptions()

@@ -1,36 +1,23 @@
 package fr.maximedavid.serverless;
 
-import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachine;
+import fr.maximedavid.serverless.extension.ext.gcp.token.machine.PubSubService;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import io.vertx.core.json.JsonObject;
-
-import io.vertx.mutiny.core.Vertx;
-
-import io.vertx.ext.web.client.WebClientOptions;
-
-import io.vertx.mutiny.ext.web.client.WebClient;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class ManagerService {
 
-    private Vertx vertx;
     private GCPConfiguration configuration;
-    private TokenMachine tokenMachine;
+    private PubSubService pubSubService;
 
-    private WebClient webclient;
     private static final Logger LOG = Logger.getLogger(ManagerService.class);
 
-    public ManagerService(GCPConfiguration configuration, TokenMachine tokenMachine, Vertx vertx) {
+    public ManagerService(GCPConfiguration configuration, PubSubService pubSubService) {
         this.configuration = configuration;
-        this.tokenMachine = tokenMachine;
-        this.vertx = vertx;
-        this.webclient = WebClient.create(vertx,
-                new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(configuration.getPubsubApiPort()).setSsl(configuration.getPubsubApiPort() == 443));
+        this.pubSubService = pubSubService;
     }
 
     public Uni<JsonObject> setStatus(Pizza pizza) {
@@ -42,20 +29,9 @@ public class ManagerService {
     }
 
     public Uni<JsonObject> publishMessage(String uuid, String eventId, boolean isManager) {
-        return tokenMachine.getAccessToken(vertx).flatMap(token -> {
-            if(null == token) {
-                LOG.error("Token is null");
-                JsonObject result = new JsonObject().put("code", 500).put("message", "error in getAccessToken");
-                return Uni.createFrom().item(result);
-            }
-            PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventId);
-            String topicUrl = isManager ? configuration.getPubsubManagerTopicPublishUrl() : configuration.getPubsubTopicPublishUrl();
-            LOG.info("Sending : " + pubSubEvent);
-            return this.webclient
-                        .post(topicUrl)
-                        .bearerTokenAuthentication(token)
-                        .sendJsonObject(pubSubEvent)
-                        .map(e -> new JsonObject());
-        });
+        PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventId);
+        LOG.info("Publishing : " + pubSubEvent.toString());
+        String topicUrl = isManager ? configuration.getPubsubManagerTopicPublishUrl() : configuration.getPubsubTopicPublishUrl();
+        return this.pubSubService.publishMessage(pubSubEvent, topicUrl);
     }
 }
