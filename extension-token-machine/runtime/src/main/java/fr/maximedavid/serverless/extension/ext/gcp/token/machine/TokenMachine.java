@@ -24,6 +24,8 @@ import java.util.concurrent.TimeUnit;
 @ApplicationScoped
 public class TokenMachine {
 
+    private final Long GRACE_PERIOD_IN_MILLIS = 5 * 60 * 1000L;
+
     protected String audience;
     protected Integer expiryLength;
     public String apiHost;
@@ -31,6 +33,7 @@ public class TokenMachine {
     protected String scope;
     protected String serviceAccount;
     private String accessToken;
+    private Date expTime;
 
     private static final Logger LOG = Logger.getLogger(TokenMachine.class);
 
@@ -44,18 +47,6 @@ public class TokenMachine {
         this.apiPath = config.apiPath;
         this.scope = config.scope;
         this.serviceAccount = config.serviceAccount;
-    }
-
-    public void setAccessToken(String accesToken) {
-        this.accessToken = accesToken;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public String getApiHost() {
-        return this.apiHost;
     }
 
     private String generateJwt() {
@@ -88,7 +79,22 @@ public class TokenMachine {
         }
     }
 
-    public Uni<Boolean> setAccessToken(io.vertx.mutiny.core.Vertx vertx) {
+    public Uni<String> getAccessToken(io.vertx.mutiny.core.Vertx vertx) {
+        if(null == this.accessToken) {
+            LOG.info("Token is null, fetching a new one");
+            return this.setAccessToken(vertx).flatMap(res -> Uni.createFrom().item(this.accessToken));
+        } else {
+            LOG.info("Token is already set");
+            if(new Date(System.currentTimeMillis()).after(this.expTime)) {
+                LOG.info("Token is about or has expired, getting a new one");
+                return this.setAccessToken(vertx).flatMap(res -> Uni.createFrom().item(this.accessToken));
+            } else {
+                return Uni.createFrom().item(this.accessToken);
+            }
+        }
+    }
+
+    private Uni<Boolean> setAccessToken(io.vertx.mutiny.core.Vertx vertx) {
         String jwt = generateJwt();
         WebClient webclient = WebClient.create(vertx,
                 new WebClientOptions()
@@ -104,9 +110,11 @@ public class TokenMachine {
                 .onItem().transform(resp -> {
                     if (resp.statusCode() == 200) {
                         JsonObject jsonResult = resp.bodyAsJsonObject();
+                        LOG.info(jsonResult);
                         String accessToken = jsonResult.getString("access_token");
                         if (null != accessToken) {
                             this.accessToken = accessToken;
+                            this.expTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(this.expiryLength) - GRACE_PERIOD_IN_MILLIS) ;
                             LOG.info("Successfully set the access_token");
                             return true;
                         } else {
