@@ -35,7 +35,7 @@ public class SimpleTest {
     GCPConfiguration configuration;
 
     @Inject
-    TokenMachine tokenMachine;
+    MockTokenMachine tokenMachine;
 
     @BeforeAll
     public static void setup() {
