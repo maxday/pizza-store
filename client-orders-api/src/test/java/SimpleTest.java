@@ -6,6 +6,7 @@ import com.google.api.gax.rpc.TransportChannelProvider;
 import com.google.cloud.pubsub.v1.TopicAdminClient;
 import com.google.cloud.pubsub.v1.TopicAdminSettings;
 import com.google.pubsub.v1.TopicName;
+import fr.maximedavid.serverless.ClientOrdersService;
 import fr.maximedavid.serverless.GCPConfiguration;
 import fr.maximedavid.serverless.PizzaOrder;
 import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachine;
@@ -27,7 +28,7 @@ import java.io.IOException;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
-@QuarkusTestResource(PubSubResource.class)
+//@QuarkusTestResource(PubSubResource.class)
 
 public class SimpleTest {
 
@@ -35,14 +36,7 @@ public class SimpleTest {
     GCPConfiguration configuration;
 
     @Inject
-    MockTokenMachine tokenMachine;
-
-    @BeforeAll
-    public static void setup() {
-        TokenMachine mock = Mockito.mock(TokenMachine.class);
-        Mockito.when(mock.getAccessToken(null)).thenReturn(Uni.createFrom().item("fakeToken"));
-        QuarkusMock.installMockForType(mock, TokenMachine.class);
-    }
+    ClientOrdersService service;
 
     @Test
     public void testSimple() {
@@ -64,6 +58,7 @@ public class SimpleTest {
 
             topicClient.createTopic(topicName);
 
+            service.setTokenMachine(new MockTokenMachine());
             given().when()
                     .contentType(ContentType.JSON)
                     .body(new PizzaOrder("myUuid", "name"))

@@ -32,6 +32,10 @@ public class ClientOrdersService {
                 new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(configuration.getPubsubApiPort()).setSsl(configuration.getPubsubApiPort() == 443));
     }
 
+    public void setTokenMachine(TokenMachine tokenMachine) {
+        this.tokenMachine = tokenMachine;
+    }
+
     public Uni<JsonObject> createOrder(PizzaOrder pizzaOrder) {
         LOG.info("Creating pizza with uuid " + pizzaOrder.getUuid() );
         return publishMessage(pizzaOrder.getUuid(), PizzaEvent.PIZZA_ORDER_REQUEST.getEvent(), pizzaOrder.getName());
