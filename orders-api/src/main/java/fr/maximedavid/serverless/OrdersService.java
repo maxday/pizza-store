@@ -99,7 +99,7 @@ public class OrdersService {
                 });
     }
 
-    public Uni<JsonObject> publishMessage(String uuid, String eventId, String extraData, String body, boolean isManager) {
+    public Uni<JsonObject> publishMessage(String uuid, String eventId, String extraData, String body, boolean isManagerTopic) {
         OutgoingPubSubEvent pubSubEvent = new OutgoingPubSubEvent(uuid, eventId, extraData, body);
         LOG.info("Publishing : " + pubSubEvent.toString());
         String topicUrl = isManager ? configuration.getPubsubManagerTopicPublishUrl() : configuration.getPubsubTopicPublishUrl();

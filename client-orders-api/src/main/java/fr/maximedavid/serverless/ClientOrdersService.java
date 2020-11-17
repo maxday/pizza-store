@@ -1,39 +1,22 @@
 package fr.maximedavid.serverless;
 
-import fr.maximedavid.serverless.extension.ext.gcp.token.machine.TokenMachine;
+import fr.maximedavid.serverless.extension.ext.gcp.token.machine.PubSubService;
 import io.smallrye.mutiny.Uni;
-
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import io.vertx.core.json.JsonObject;
-import io.vertx.mutiny.core.Vertx;
-
-import io.vertx.ext.web.client.WebClientOptions;
-import io.vertx.mutiny.ext.web.client.WebClient;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class ClientOrdersService {
 
-    private Vertx vertx;
     private GCPConfiguration configuration;
-    private TokenMachine tokenMachine;
-
-    private WebClient webclient;
+    private PubSubService pubSubService;
 
     private static final Logger LOG = Logger.getLogger(ClientOrdersService.class);
 
-    public ClientOrdersService(GCPConfiguration configuration, TokenMachine tokenMachine, Vertx vertx) {
+    public ClientOrdersService(GCPConfiguration configuration, PubSubService pubSubService) {
         this.configuration = configuration;
-        this.tokenMachine = tokenMachine;
-        this.vertx = vertx;
-        this.webclient = WebClient.create(vertx,
-                new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(configuration.getPubsubApiPort()).setSsl(configuration.getPubsubApiPort() == 443));
-    }
-
-    public void setTokenMachine(TokenMachine tokenMachine) {
-        this.tokenMachine = tokenMachine;
+        this.pubSubService = pubSubService;
     }
 
     public Uni<JsonObject> createOrder(PizzaOrder pizzaOrder) {
@@ -47,20 +30,9 @@ public class ClientOrdersService {
     }
 
     public Uni<JsonObject> publishMessage(String uuid, String eventName, String name) {
-        return tokenMachine.getAccessToken(vertx).flatMap(token -> {
-            if(null == token) {
-                LOG.error("Token is null");
-                JsonObject result = new JsonObject().put("code", 500).put("message", "error in getAccessToken");
-                return Uni.createFrom().item(result);
-            }
-            PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventName, name);
-            LOG.info("Sending : " + pubSubEvent);
-            return this.webclient
-                    .post(configuration.getPubsubTopicPublishUrl())
-                    .bearerTokenAuthentication(token)
-                    .sendJsonObject(pubSubEvent)
-                    .map(e -> new JsonObject());
-        });
+        PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventName, name);
+        LOG.info("Publishing : " + pubSubEvent.toString());
+        return this.pubSubService.publishMessage(pubSubEvent, configuration.getPubsubTopicPublishUrl());
     }
 
 }
