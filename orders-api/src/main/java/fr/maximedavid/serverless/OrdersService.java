@@ -6,7 +6,6 @@ import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 import io.vertx.core.json.JsonObject;
 import org.bson.Document;
@@ -24,21 +23,23 @@ import static com.mongodb.client.model.Filters.eq;
 @ApplicationScoped
 public class OrdersService {
 
+    private Vertx vertx;
+    private GCPConfiguration configuration;
+    private TokenMachine tokenMachine;
+    private ReactiveMongoClient mongoClient;
+
     private WebClient webclient;
 
-    @Inject
-    Vertx vertx;
-
-    @Inject
-    GCPConfiguration configuration;
-
-    @Inject
-    ReactiveMongoClient mongoClient;
-
-    @Inject
-    TokenMachine tokenMachine;
-
     private static final Logger LOG = Logger.getLogger(OrdersService.class);
+
+    public OrdersService(GCPConfiguration configuration, TokenMachine tokenMachine, Vertx vertx, ReactiveMongoClient mongoClient) {
+        this.configuration = configuration;
+        this.tokenMachine = tokenMachine;
+        this.vertx = vertx;
+        this.mongoClient = mongoClient;
+        this.webclient = WebClient.create(vertx,
+                new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(configuration.getPubsubApiPort()).setSsl(configuration.getPubsubApiPort() == 443));
+    }
 
     public Uni<JsonObject> receive(IncomingPubSubEvent pubSubEvent) {
         String eventId = pubSubEvent.getMessage().getAttributes().getEventId();
@@ -72,7 +73,7 @@ public class OrdersService {
                 .append("name", name)
                 .append("status", PizzaEvent.PIZZA_ORDERED.getEvent());
         return getCollection().insertOne(document)
-                .flatMap(res -> publishMessage(uuid, PizzaEvent.PIZZA_ORDERED.getEvent(), null, null, false, true))
+                .flatMap(res -> publishMessage(uuid, PizzaEvent.PIZZA_ORDERED.getEvent(), null, null, false))
                 .flatMap(res -> handlePizzaOrderListRequest());
     }
 
@@ -83,14 +84,14 @@ public class OrdersService {
                 .collectItems()
                 .first().flatMap(res ->
                         publishMessage(uuid, PizzaEvent.PIZZA_STATUS_REQUEST_COMPLETED.getEvent(),
-                                res, null, false, true));
+                                res, null, false));
     }
 
     private Uni<JsonObject> handlePizzaChangeStatusRequest(String uuid, String eventId) {
         String newEventId = eventId.replace("_REQUEST", "");
         return getCollection().updateOne(eq("uuid", uuid),
                 new Document("$set", new Document("status", newEventId)))
-                .flatMap(res -> publishMessage(uuid, newEventId, null, null, false, true));
+                .flatMap(res -> publishMessage(uuid, newEventId, null, null, false));
     }
 
     public Uni<JsonObject> handlePizzaOrderListRequest() {
@@ -105,44 +106,27 @@ public class OrdersService {
                 .flatMap(res -> {
                     String base64EncodedString = Base64.getEncoder().encodeToString(res.toString().getBytes());
                     return publishMessage(null, PizzaEvent.PIZZA_ORDER_LIST_REQUEST_COMPLETED.getEvent(),
-                            null, base64EncodedString, true, true);
+                            null, base64EncodedString, true);
                 });
     }
 
-    public Uni<JsonObject> publishMessage(String uuid, String eventId, String extraData, String body, boolean isManagerTopic, boolean retry) {
+    public Uni<JsonObject> publishMessage(String uuid, String eventId, String extraData, String body, boolean isManagerTopic) {
         LOG.info("publishMessage");
-        String token = System.getProperty("access.token");
-        String topicPath = isManagerTopic ? configuration.getPubsubManagerTopicPublishUrl() : configuration.getPubsubTopicPublishUrl();
-        OutgoingPubSubEvent pubSubEvent = new OutgoingPubSubEvent(uuid, eventId, extraData, body);
-        this.webclient = WebClient.create(vertx,
-                new WebClientOptions().setDefaultHost(configuration.getPubsubApiHost()).setDefaultPort(configuration.getPubsubApiPort()).setSsl(configuration.getPubsubApiPort() == 443));
-        return this.webclient
-                .post(topicPath)
-                .bearerTokenAuthentication(tokenMachine.getAccessToken())
-                .sendJsonObject(pubSubEvent)
-                .flatMap(resp -> {
-                    Uni<Boolean> toReturn = Uni.createFrom().item(false);
-                    if (resp.statusCode() == 200) {
-                        LOG.info("Successfully sent message on topic" + topicPath);
-                    } else {
-                        LOG.info("Impossible to send the message" + topicPath);
-                        LOG.info("Retry = " + retry);
-                        if (retry) {
-                            toReturn = tokenMachine.setAccessToken(vertx);
-                        }
-                    }
-                    return toReturn;
-                })
-                .flatMap(shouldRetry -> {
-                    LOG.info("In shouldRetry = " + retry);
-                    if (shouldRetry) {
-                        LOG.info("RETRY");
-                        return publishMessage(uuid, eventId, extraData, body, isManagerTopic, false);
-                    } else {
-                        LOG.info("PAS DE RETRY");
-                        return Uni.createFrom().nullItem();
-                    }
-                });
+        return tokenMachine.getAccessToken(vertx).flatMap(token -> {
+            if(null == token) {
+                LOG.error("Token is null");
+                JsonObject result = new JsonObject().put("code", 500).put("message", "error in getAccessToken");
+                return Uni.createFrom().item(result);
+            }
+            OutgoingPubSubEvent pubSubEvent = new OutgoingPubSubEvent(uuid, eventId, extraData, body);
+            String topicPath = isManagerTopic ? configuration.getPubsubManagerTopicPublishUrl() : configuration.getPubsubTopicPublishUrl();
+            LOG.info("Sending : " + pubSubEvent);
+            return this.webclient
+                    .post(topicPath)
+                    .bearerTokenAuthentication(token)
+                    .sendJsonObject(pubSubEvent)
+                    .map(e -> new JsonObject());
+        });
     }
 
     private ReactiveMongoCollection<Document> getCollection() {
