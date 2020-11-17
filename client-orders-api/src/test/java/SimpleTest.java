@@ -28,7 +28,7 @@ import java.io.IOException;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
-//@QuarkusTestResource(PubSubResource.class)
+@QuarkusTestResource(PubSubResource.class)
 
 public class SimpleTest {
 
