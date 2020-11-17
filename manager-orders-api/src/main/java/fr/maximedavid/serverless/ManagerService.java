@@ -43,7 +43,6 @@ public class ManagerService {
 
     public Uni<JsonObject> publishMessage(String uuid, String eventId, boolean isManager) {
         return tokenMachine.getAccessToken(vertx).flatMap(token -> {
-            LOG.info("HERE IS MY TOKEN = " + token);
             if(null == token) {
                 LOG.error("Token is null");
                 JsonObject result = new JsonObject().put("code", 500).put("message", "error in getAccessToken");
