@@ -3,6 +3,7 @@ on:
   push:
     paths:
     - 'client-orders-api/**'
+    - 'extension-token-machine/**'
     - 'buildAll'
 
 jobs:

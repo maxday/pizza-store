@@ -109,7 +109,6 @@ public class TokenMachine {
                 .onItem().transform(resp -> {
                     if (resp.statusCode() == 200) {
                         JsonObject jsonResult = resp.bodyAsJsonObject();
-                        LOG.info(jsonResult);
                         String accessToken = jsonResult.getString("access_token");
                         if (null != accessToken) {
                             this.accessToken = accessToken;
