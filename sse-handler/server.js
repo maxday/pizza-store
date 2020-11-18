@@ -72,7 +72,12 @@ const listenForMessages = async () => {
 }
 
 
-await listenForMessages();
-console.log('SERVER START WITH : UUID', uuid);
-app.listen(process.env.PORT || 9000);
+(async () => {
+	await listenForMessages();
+	console.log('SERVER START WITH : UUID', uuid);
+	app.listen(process.env.PORT || 9000);
+})().catch(err => {
+	console.error(err);
+});
+
 
