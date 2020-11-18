@@ -9,9 +9,9 @@ app.use(bodyParser.json());
 
 const clients = {}; 
 const uuid = uuidv4();
-console.log('SERVER START WITH : UUID', uuid);
 
 app.get('/events/:uuid', function (req, res) {
+	console.log("event/uuid called");
 	res.writeHead(200, {
 		'Access-Control-Allow-Origin': '*',
 		'Content-Type': 'text/event-stream', 
@@ -28,10 +28,12 @@ app.get('/events/:uuid', function (req, res) {
 	})()
 });
 
-const listenForMessages = async (isManager) => {
+const listenForMessages = async () => {
   try {
 	const pubSubClient = new PubSub();
-  	const [subscription] = await pubSubClient.topic(process.env.TOPIC_NAME).createSubscription('rand'+Math.random());
+	  const [subscription] = await pubSubClient
+	  .topic(process.env.TOPIC_NAME)
+	  .createSubscription('rand'+Math.random());
 
 	const messageHandler = message => {
 		console.log(`message data: ${JSON.stringify(message.data)}`);
@@ -40,6 +42,7 @@ const listenForMessages = async (isManager) => {
 		if(jsonData.hasOwnProperty("uuid") && clients.hasOwnProperty(jsonData.uuid)) {
 			console.log("found client");
 			clients[jsonData.uuid].write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: jsonData.extraData})}\n\n`); 
+			message.ack();
 		}
 		else if(jsonData.uuid === "") {
 			if(jsonData.eventId === "PIZZA_ORDER_LIST_REQUEST") {
@@ -53,16 +56,15 @@ const listenForMessages = async (isManager) => {
 				console.log(payload);
 				const jsonPayload = JSON.parse(payload);
 				console.log(jsonPayload);
-
 				Object.keys(clients).forEach(e => clients[e].write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: jsonPayload})}\n\n`));
 			}
 		}
 		else {
 			console.log("skipping!");
 		}
-		message.ack();
 	};
 	subscription.on('message', messageHandler);
+	console.log("SUBSCRIPTION IS SET");
   } catch(e) {
 	  console.log('ERROR');
 	  console.log(e);
@@ -70,6 +72,7 @@ const listenForMessages = async (isManager) => {
 }
 
 
-
+await listenForMessages();
+console.log('SERVER START WITH : UUID', uuid);
 app.listen(process.env.PORT || 9000);
-listenForMessages();
+
