@@ -1,6 +1,5 @@
 package fr.maximedavid.serverless.extension.ext.gcp.token.machine;
 
-import io.quarkus.vertx.runtime.VertxRecorder;
 import io.smallrye.mutiny.Uni;
 
 import io.vertx.core.json.JsonObject;
@@ -11,10 +10,8 @@ import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.ext.web.client.WebClient;
 import org.jboss.logging.Logger;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.util.function.Supplier;
+
 
 @ApplicationScoped
 public class PubSubService {
@@ -26,6 +23,10 @@ public class PubSubService {
     private static final Logger LOG = Logger.getLogger(PubSubService.class);
 
     public PubSubService() {
+    }
+
+    public void setTokenMachine(TokenMachine tokenMachine) {
+        this.tokenMachine = tokenMachine;
     }
 
     public void setConfig(TokenMachineConfig tokenMachineConfig, PubSubConfig pubSubConfig) {

@@ -39,6 +39,10 @@ public class TokenMachine {
 
     private static final Logger LOG = Logger.getLogger(TokenMachine.class);
 
+    public TokenMachine() {
+
+    }
+
     public TokenMachine(TokenMachineConfig config) {
         this.audience = config.audience;
         this.expiryLength = config.expiryLength;
@@ -72,9 +76,8 @@ public class TokenMachine {
 
             return token.sign(algorithm);
         } catch (Exception e) {
-            LOG.error("Impossible to generate the JWT");
-            LOG.error(e);
-            return "";
+            LOG.error("Impossible to generate the JWT", e);
+            return "invalid jwt";
         }
     }
 
@@ -117,12 +120,11 @@ public class TokenMachine {
                             return true;
                         } else {
                             LOG.error("Error while getting an access_token");
-                            return false;
                         }
                     } else {
                         LOG.error("error = " + resp.bodyAsString());
-                        return false;
                     }
+                    return false;
                 });
     }
 }

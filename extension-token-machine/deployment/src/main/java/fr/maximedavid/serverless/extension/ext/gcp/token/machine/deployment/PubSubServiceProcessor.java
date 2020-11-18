@@ -5,6 +5,8 @@ import io.quarkus.arc.deployment.*;
 import io.quarkus.deployment.annotations.*;
 import io.quarkus.deployment.annotations.Record;
 import org.jboss.logging.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Singleton;
 
 import static io.quarkus.deployment.annotations.ExecutionTime.RUNTIME_INIT;
@@ -15,7 +17,7 @@ public class PubSubServiceProcessor {
     @BuildStep
     @Record(STATIC_INIT)
     SyntheticBeanBuildItem syntheticBean(PubSubRecorder recorder) {
-        return SyntheticBeanBuildItem.configure(PubSubService.class).scope(Singleton.class)
+        return SyntheticBeanBuildItem.configure(PubSubService.class).scope(ApplicationScoped.class)
                 .runtimeValue(recorder.getPubSubService())
                 .done();
     }

@@ -50,6 +50,11 @@
       <artifactId>quarkus-resteasy-jsonb</artifactId>
     </dependency>
     <dependency>
+      <groupId>fr.maximedavid.serverless.extension</groupId>
+      <artifactId>ext-gcp-token-machine</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-junit5</artifactId>
       <scope>test</scope>
@@ -60,29 +65,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>fr.maximedavid.serverless.extension</groupId>
-      <artifactId>ext-gcp-token-machine</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-junit5-mockito</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>gcloud</artifactId>
-      <version>1.15.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <version>1.15.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.cloud</groupId>
-      <artifactId>google-cloud-pubsub</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

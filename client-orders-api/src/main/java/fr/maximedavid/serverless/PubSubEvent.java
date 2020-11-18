@@ -17,6 +17,7 @@ public class PubSubEvent extends JsonObject {
         attributes.put("uuid", uuid);
         attributes.put("eventId", eventId);
         attributes.put("name", name);
+        attributes.put("isPublic", "true");
         item0.put("attributes", attributes);
     }
 
