@@ -59,7 +59,7 @@ const messageHandler = (uuid, message) => {
 	let bufferOriginal = Buffer.from(message.data);
 	const payload = bufferOriginal.toString('utf8')
 	try {
-		clients[uuid].write(`data: ${JSON.stringify(payload)}\n\n`);
+		clients[uuid].write(`data: ${JSON.stringify({attributes: message.attributes, payload})}\n\n`);
 		message.ack();
 		logger.info(`messsage delivered to ${uuid}, evendId = ${message.attributes.eventId}`);
 	} catch(e) {
