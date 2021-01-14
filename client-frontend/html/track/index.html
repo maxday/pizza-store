@@ -64,13 +64,12 @@
       }
       source.onmessage = event => {
         buttons.forEach(e => document.getElementById(e).classList.remove('btn-success'));
-        console.log(event);
-        console.log(event.eventId);
         const data = JSON.parse(event.data);
-        if(document.getElementById(data.eventId)) {
-          document.getElementById(data.eventId).classList.add('btn-success');
+        const eventId = data.attributes.eventId;
+        if(document.getElementById(eventId)) {
+          document.getElementById(eventId).classList.add('btn-success');
         }
-        if(data.eventId === "PIZZA_STATUS_REQUEST_COMPLETED") {
+        if(eventId === "PIZZA_STATUS_REQUEST_COMPLETED") {
           if(document.getElementById(data.payload)) {
             document.getElementById(data.payload).classList.add('btn-success');
           }
