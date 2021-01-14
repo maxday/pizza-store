@@ -65,14 +65,14 @@
       source.onmessage = event => {
         buttons.forEach(e => document.getElementById(e).classList.remove('btn-success'));
         console.log(event);
-        console.log(event.data);
+        console.log(event.eventId);
         const data = JSON.parse(event.data);
-        if(document.getElementById(data.name)) {
-          document.getElementById(data.name).classList.add('btn-success');
+        if(document.getElementById(data.eventId)) {
+          document.getElementById(data.eventId).classList.add('btn-success');
         }
-        if(data.name === "PIZZA_STATUS_REQUEST_COMPLETED") {
-          if(document.getElementById(data.extraData)) {
-            document.getElementById(data.extraData).classList.add('btn-success');
+        if(data.eventId === "PIZZA_STATUS_REQUEST_COMPLETED") {
+          if(document.getElementById(data.payload)) {
+            document.getElementById(data.payload).classList.add('btn-success');
           }
         }
       };
