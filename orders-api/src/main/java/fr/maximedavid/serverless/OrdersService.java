@@ -47,7 +47,7 @@ public class OrdersService {
             return handlePizzaChangeStatusRequest(uuid, eventId);
         } else if(PizzaEvent.PIZZA_STATUS_REQUEST.getEvent().equals(eventId)) {
             LOG.info("Get status handler");
-            return handlePizzaStatusRequest(uuid, eventId);
+            return handlePizzaStatusRequest(uuid);
         } else if(PizzaEvent.PIZZA_ORDER_LIST_REQUEST.getEvent().equals(eventId)) {
             LOG.info("List order handler");
             return handlePizzaOrderListRequest();
@@ -68,7 +68,7 @@ public class OrdersService {
                 .flatMap(res -> handlePizzaOrderListRequest());
     }
 
-    private Uni<JsonObject> handlePizzaStatusRequest(String uuid, String name) {
+    private Uni<JsonObject> handlePizzaStatusRequest(String uuid) {
         return getCollection()
                 .find(eq("uuid", uuid))
                 .map(doc -> doc.getString("status"))
@@ -76,10 +76,10 @@ public class OrdersService {
                 .first()
                 .flatMap(res -> {
                     if(null == res) {
-                        throw new WebApplicationException(Response.Status.NOT_FOUND);
+                        return publishMessage(uuid, PizzaEvent.PIZZA_STATUS_REQUEST_FAILED.getEvent(), null, false);
                     }
                     String base64EncodedString = Base64.getEncoder().encodeToString(res.getBytes());
-                    return publishMessage("79b5b368-6e3c-4cb2-94ad-18a4305ae27c", PizzaEvent.PIZZA_STATUS_REQUEST_COMPLETED.getEvent(), base64EncodedString, false);
+                    return publishMessage(uuid, PizzaEvent.PIZZA_STATUS_REQUEST_COMPLETED.getEvent(), base64EncodedString, false);
                 });
     }
 
