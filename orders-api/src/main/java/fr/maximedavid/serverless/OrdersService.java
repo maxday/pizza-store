@@ -33,10 +33,10 @@ public class OrdersService {
     public Uni<JsonObject> receive(IncomingPubSubEvent pubSubEvent) {
         String eventId = pubSubEvent.getMessage().getAttributes().getEventId();
         String uuid = pubSubEvent.getMessage().getAttributes().getUuid();
-        String name = pubSubEvent.getMessage().getAttributes().getName();
+        String payload = pubSubEvent.getMessage().getData();
         LOG.info("Received eventId = " + eventId + " with uuid = " + uuid);
         if(PizzaEvent.PIZZA_ORDER_REQUEST.getEvent().equals(eventId)) {
-            return handlePizzaCreationRequest(uuid, name);
+            return handlePizzaCreationRequest(uuid, payload);
         } else if (PizzaEvent.PIZZA_PREPARED_REQUEST.getEvent().equals(eventId)
                 || PizzaEvent.PIZZA_BAKED_REQUEST.getEvent().equals(eventId)
                 || PizzaEvent.PIZZA_LEFT_STORE_REQUEST.getEvent().equals(eventId)
@@ -62,7 +62,7 @@ public class OrdersService {
                 .append("name", name)
                 .append("status", PizzaEvent.PIZZA_ORDERED.getEvent());
         return getCollection().insertOne(document)
-                .flatMap(res -> publishMessage(uuid, PizzaEvent.PIZZA_ORDERED.getEvent(), null, null, false))
+                .flatMap(res -> publishMessage(uuid, PizzaEvent.PIZZA_ORDERED.getEvent(), null, false))
                 .flatMap(res -> handlePizzaOrderListRequest());
     }
 
@@ -71,16 +71,17 @@ public class OrdersService {
                 .find(eq("uuid", uuid))
                 .map(doc -> doc.getString("status"))
                 .collectItems()
-                .first().flatMap(res ->
-                        publishMessage(uuid, PizzaEvent.PIZZA_STATUS_REQUEST_COMPLETED.getEvent(),
-                                res, null, false));
+                .first().flatMap(res -> {
+                        String base64EncodedString = Base64.getEncoder().encodeToString(res.getBytes());
+                        return publishMessage(uuid, PizzaEvent.PIZZA_STATUS_REQUEST_COMPLETED.getEvent(), base64EncodedString, false);
+                });
     }
 
     private Uni<JsonObject> handlePizzaChangeStatusRequest(String uuid, String eventId) {
         String newEventId = eventId.replace("_REQUEST", "");
         return getCollection().updateOne(eq("uuid", uuid),
                 new Document("$set", new Document("status", newEventId)))
-                .flatMap(res -> publishMessage(uuid, newEventId, null, null, false));
+                .flatMap(res -> publishMessage(uuid, newEventId, null, false));
     }
 
     public Uni<JsonObject> handlePizzaOrderListRequest() {
@@ -94,13 +95,12 @@ public class OrdersService {
                 }).collectItems().asList()
                 .flatMap(res -> {
                     String base64EncodedString = Base64.getEncoder().encodeToString(res.toString().getBytes());
-                    return publishMessage(null, PizzaEvent.PIZZA_ORDER_LIST_REQUEST_COMPLETED.getEvent(),
-                            null, base64EncodedString, true);
+                    return publishMessage(null, PizzaEvent.PIZZA_ORDER_LIST_REQUEST_COMPLETED.getEvent(), base64EncodedString, true);
                 });
     }
 
-    public Uni<JsonObject> publishMessage(String uuid, String eventId, String extraData, String body, boolean isManager) {
-        OutgoingPubSubEvent pubSubEvent = new OutgoingPubSubEvent(uuid, eventId, extraData, body);
+    public Uni<JsonObject> publishMessage(String uuid, String eventId, String body, boolean isManager) {
+        OutgoingPubSubEvent pubSubEvent = new OutgoingPubSubEvent(uuid, eventId, body);
         LOG.info("Publishing : " + pubSubEvent.toString());
         String topicUrl = isManager ? configuration.getPubsubManagerTopicPublishUrl() : configuration.getPubsubTopicPublishUrl();
         return this.pubSubService.publishMessage(pubSubEvent, topicUrl);
