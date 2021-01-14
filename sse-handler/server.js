@@ -1,17 +1,76 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 const { v4: uuidv4 } = require('uuid');
+const winston = require('winston');
 const { PubSub } = require('@google-cloud/pubsub');
-const { json } = require('body-parser');
+
+const logger = winston.createLogger({
+	level: 'info',
+	transports: [
+	  new winston.transports.Console(),
+	]
+  });
 
 var app = express();
 app.use(bodyParser.json());
 
 const clients = {}; 
-const uuid = uuidv4();
 
-app.get('/events/:uuid', function (req, res) {
-	console.log("event/uuid called");
+const createSubscription = async (uuid) => {
+	const pubSubClient = new PubSub();
+	const [subscription] = await pubSubClient
+	//.topic(process.env.TOPIC_NAME)
+	.topic('projects/techday-pizza-store-demo/topics/pizza-store')
+	.createSubscription(`sub_${uuid}`, {
+		filter: `attributes.uuid = "${uuid}"`,
+	})
+	.catch(e => {
+		if(e.code === 6) {
+			logger.info(`subscription with uuid ${uuid} already exists`);
+			return [null];
+		} else {
+			logger.info(`unexpected error in createSubscription ${e}`);
+			throw Error('unexpected error');
+		}
+	});
+	return subscription;
+}
+
+const getSubscription = async (uuid) => {
+	const pubSubClient = new PubSub();
+	const subscription = await pubSubClient
+	//.topic(process.env.TOPIC_NAME)
+	.topic('projects/techday-pizza-store-demo/topics/pizza-store')
+	.subscription(`sub_${uuid}`);
+	return subscription;
+}
+
+const createPullSubscription = async (uuid) => {
+	let subscription = await createSubscription(uuid);
+	if(!subscription) {
+		subscription = await getSubscription(uuid);
+	}
+	logger.info(`Subscription with uuid = ${uuid} is ready`);
+	subscription.on('message', (message) => messageHandler(uuid, message));
+};
+
+
+const messageHandler = (uuid, message) => {
+	let bufferOriginal = Buffer.from(message.data);
+	const payload = bufferOriginal.toString('utf8')
+	try {
+		clients[uuid].write(`data: ${JSON.stringify(payload)}\n\n`);
+		message.ack();
+		logger.info(`messsage delivered to ${uuid}, evendId = ${message.attributes.eventId}`);
+	} catch(e) {
+		message.nack();
+		logger.info(`messsage failed to delivered to ${uuid}`);
+	}
+};
+
+app.get('/events/:uuid', async (req, res) => {
+	const clientId = req.params.uuid;
+	await createPullSubscription(clientId);
 	res.writeHead(200, {
 		'Access-Control-Allow-Origin': '*',
 		'Content-Type': 'text/event-stream', 
@@ -20,7 +79,6 @@ app.get('/events/:uuid', function (req, res) {
 	});
 	res.write('\n');
 	(function () {
-		const clientId = req.params.uuid;
 		clients[clientId] = res; 
 		req.on("close", function () {
 			delete clients[clientId]
@@ -28,53 +86,8 @@ app.get('/events/:uuid', function (req, res) {
 	})()
 });
 
-const listenForMessages = async () => {
-  try {
-	const pubSubClient = new PubSub();
-	  const [subscription] = await pubSubClient
-	  .topic(process.env.TOPIC_NAME)
-	  .createSubscription('rand'+Math.random());
-
-	const messageHandler = message => {
-		console.log(`message data: ${JSON.stringify(message.data)}`);
-		console.log(`message attributes: ${JSON.stringify(message.attributes)}`);
-		const jsonData = message.attributes;
-		if(jsonData.hasOwnProperty("uuid") && clients.hasOwnProperty(jsonData.uuid)) {
-			console.log("found client");
-			clients[jsonData.uuid].write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: jsonData.extraData})}\n\n`); 
-			message.ack();
-		}
-		else if(jsonData.uuid === "") {
-			if(jsonData.eventId === "PIZZA_ORDER_LIST_REQUEST") {
-				console.log("SKIP EVENT");
-			} else {
-				//brodcast to managers
-				console.log("brodcast !");
-				let bufferOriginal = Buffer.from(message.data);
-				console.log(bufferOriginal);
-				const payload = bufferOriginal.toString('utf8')
-				console.log(payload);
-				const jsonPayload = JSON.parse(payload);
-				console.log(jsonPayload);
-				Object.keys(clients).forEach(e => clients[e].write(`data: ${JSON.stringify({ name: jsonData.eventId, extraData: jsonPayload})}\n\n`));
-			}
-		}
-		else {
-			console.log("skipping!");
-		}
-	};
-	subscription.on('message', messageHandler);
-	console.log("SUBSCRIPTION IS SET");
-  } catch(e) {
-	  console.log('ERROR');
-	  console.log(e);
-  }
-}
-
-
 (async () => {
-	await listenForMessages();
-	console.log('SERVER START WITH : UUID', uuid);
+	logger.info(`new instance started, with uuid : ${uuidv4()}`);
 	app.listen(process.env.PORT || 9000);
 })().catch(err => {
 	console.error(err);
