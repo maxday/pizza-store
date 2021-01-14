@@ -6,6 +6,8 @@ import io.quarkus.mongodb.reactive.ReactiveMongoCollection;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import io.vertx.core.json.JsonObject;
 import org.bson.Document;
@@ -71,9 +73,13 @@ public class OrdersService {
                 .find(eq("uuid", uuid))
                 .map(doc -> doc.getString("status"))
                 .collectItems()
-                .first().flatMap(res -> {
-                        String base64EncodedString = Base64.getEncoder().encodeToString(res.getBytes());
-                        return publishMessage(uuid, PizzaEvent.PIZZA_STATUS_REQUEST_COMPLETED.getEvent(), base64EncodedString, false);
+                .first()
+                .flatMap(res -> {
+                    if(null == res) {
+                        throw new WebApplicationException(Response.Status.NOT_FOUND);
+                    }
+                    String base64EncodedString = Base64.getEncoder().encodeToString(res.getBytes());
+                    return publishMessage("79b5b368-6e3c-4cb2-94ad-18a4305ae27c", PizzaEvent.PIZZA_STATUS_REQUEST_COMPLETED.getEvent(), base64EncodedString, false);
                 });
     }
 
