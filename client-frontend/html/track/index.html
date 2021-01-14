@@ -43,7 +43,6 @@
       </div>
     </main>
     <script>
-
       const regexp = /\?uuid=(.*)&name=(.*)/
       const matched = location.search.match(regexp);
       const orderId = matched.length === 3 ? matched[1] : 'incorrect order';
@@ -57,7 +56,7 @@
         "PIZZA_LEFT_STORE",
         "PIZZA_DELIVERED"
       ];
-      const source = new EventSource(`/events/${orderId}`);
+      const source = new EventSource(`http://localhost:9000/events/${orderId}`);
       source.onopen = event => {
         if(orderName !== 'tracking') {
           (async () => {
@@ -66,7 +65,7 @@
               name: orderName, 
             }
 
-            const response = await fetch('/orders', { 
+            const response = await fetch('http://localhost:8090/orders', { 
               method: 'POST', 
               headers: {
                 'Content-Type': 'application/json'
@@ -80,7 +79,7 @@
           });
         } else {
           (async () => {
-            const response = await fetch(`/orders/${orderId}`);
+            const response = await fetch(`http://localhost:8090/orders/${orderId}`);
             console.log(response.status);
           })().catch(err => {
               console.error(err);

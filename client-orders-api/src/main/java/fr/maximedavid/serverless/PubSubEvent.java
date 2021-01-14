@@ -11,7 +11,9 @@ public class PubSubEvent extends JsonObject {
         JsonArray messages = new JsonArray();
         this.put("messages", messages);
         JsonObject item0 = new JsonObject();
-        item0.put("data", Base64.getEncoder().encodeToString(name.getBytes()));
+        if(null != name) {
+            item0.put("data", Base64.getEncoder().encodeToString(name.getBytes()));
+        }
         messages.add(item0);
         JsonObject attributes = new JsonObject();
         attributes.put("uuid", uuid);
