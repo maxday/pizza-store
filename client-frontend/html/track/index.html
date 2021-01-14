@@ -43,12 +43,8 @@
       </div>
     </main>
     <script>
-
-      const regexp = /\?uuid=(.*)&name=(.*)/
-      const matched = location.search.match(regexp);
-      const orderId = matched.length === 3 ? matched[1] : 'incorrect order';
-      const orderName = matched.length === 3 ? matched[2] : 'incorrect pizza name';
-      document.getElementById("orderMessage").innerText = `Your order #${orderId} (${orderName})`;
+      const orderId = location.search.split('=').length === 2 ? location.search.split('=')[1] : 'incorrect order';
+      document.getElementById("orderMessage").innerText = `Your order #${orderId}`;
       const buttons = [
         "PIZZA_ORDER_REQUEST", 
         "PIZZA_ORDERED", 
