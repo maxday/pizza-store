@@ -59,34 +59,13 @@
       ];
       const source = new EventSource(`/events/${orderId}`);
       source.onopen = event => {
-        if(orderName !== 'tracking') {
-          (async () => {
-            const pizza = {
-              uuid: orderId,
-              name: orderName, 
-            }
-
-            const response = await fetch('/orders', { 
-              method: 'POST', 
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(pizza)
-            });
-            console.log(response.status);
-            location.href = `/track/?uuid=${orderId}&name=tracking`
-          })().catch(err => {
-              console.error(err);
-          });
-        } else {
-          (async () => {
+        (async () => {
             const response = await fetch(`/orders/${orderId}`);
             console.log(response.status);
           })().catch(err => {
               console.error(err);
           });
-        }
-      };
+      }
       source.onmessage = event => {
         buttons.forEach(e => document.getElementById(e).classList.remove('btn-success'));
         console.log(event);

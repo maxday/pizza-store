@@ -76,10 +76,22 @@
         }
         const track = () => {
             const orderId = document.getElementById('order') ? document.getElementById('order').value : '';
-            location.href = `track/?uuid=${orderId}&name=tracking`
+            location.href = `track/?uuid=${orderId}`
         }
         const order = (pizzaName) => {
-            location.href = `track/?uuid=${uuidv4()}&name=${pizzaName}`
+          const uuid = uuidv4();
+          const pizza = {
+            uuid,
+            name: pizzaName, 
+          }
+          const response = await fetch('/orders', { 
+            method: 'POST', 
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(pizza)
+          });
+          location.href = `track/?uuid=${orderId}`
         }
     </script>
   </body>

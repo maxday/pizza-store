@@ -1,3 +1,4 @@
+.terraform.lock.hcl
 sse-handler/node_modules
 extension-token-machine/target
 extension-token-machine/.idea
