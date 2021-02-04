@@ -40,16 +40,15 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy-jsonb</artifactId>
+      <artifactId>quarkus-resteasy-jackson</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-mongodb-client</artifactId>
+      <artifactId>quarkus-vertx</artifactId>
     </dependency>
     <dependency>
-      <groupId>fr.maximedavid.serverless.extension</groupId>
-      <artifactId>ext-gcp-token-machine</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <groupId>io.smallrye.reactive</groupId>
+      <artifactId>smallrye-mutiny-vertx-web-client</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>

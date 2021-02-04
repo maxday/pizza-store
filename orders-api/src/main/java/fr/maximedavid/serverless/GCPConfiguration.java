@@ -5,18 +5,12 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ConfigProperties(prefix = "gcp")
 public interface GCPConfiguration { ;
-    String getPubsubTopicPublishUrl();
-    String getPubsubManagerTopicPublishUrl();
-
-    @ConfigProperty(defaultValue = "pubsub.googleapis.com")
-    String getPubsubApiHost();
-
-    @ConfigProperty(defaultValue = "443")
-    int getPubsubApiPort();
-
-    @ConfigProperty(defaultValue = "pizzaStore")
+    String getProjectName();
     String getDatabaseName();
 
-    @ConfigProperty(defaultValue = "orders")
-    String getCollectionName();
+    @ConfigProperty(defaultValue = "firestore.googleapis.com")
+    String getFirestoreApiHost();
+
+    @ConfigProperty(defaultValue = "/v1/projects/")
+    String getApiPath();
 }
