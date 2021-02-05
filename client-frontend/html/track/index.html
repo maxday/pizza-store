@@ -16,6 +16,13 @@
   </head>
   <body class="bg-light">
 
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-firestore.js"></script>
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+        https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-analytics.js"></script>
+
     
     <main role="main" class="container">
       <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded box-shadow">
@@ -45,6 +52,7 @@
     <script>
       const orderId = location.search.split('=').length === 2 ? location.search.split('=')[1] : 'incorrect order';
       document.getElementById("orderMessage").innerText = `Your order #${orderId}`;
+
       const buttons = [
         "PIZZA_ORDER_REQUEST", 
         "PIZZA_ORDERED", 
@@ -53,28 +61,34 @@
         "PIZZA_LEFT_STORE",
         "PIZZA_DELIVERED"
       ];
-      const source = new EventSource(`/events/${orderId}`);
-      source.onopen = event => {
-        (async () => {
-            const response = await fetch(`/orders/${orderId}`);
-            console.log(response.status);
-          })().catch(err => {
-              console.error(err);
-          });
-      }
-      source.onmessage = event => {
-        buttons.forEach(e => document.getElementById(e).classList.remove('btn-success'));
-        const data = JSON.parse(event.data);
-        const eventId = data.attributes.eventId;
-        if(document.getElementById(eventId)) {
-          document.getElementById(eventId).classList.add('btn-success');
-        }
-        if(eventId === "PIZZA_STATUS_REQUEST_COMPLETED") {
-          if(document.getElementById(data.payload)) {
-            document.getElementById(data.payload).classList.add('btn-success');
-          }
-        }
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBVPyPPEKxqvcSzis5hQuwcNxY-1tkfzso",
+        authDomain: "techday-pizza-store-demo.firebaseapp.com",
+        projectId: "techday-pizza-store-demo",
+        storageBucket: "techday-pizza-store-demo.appspot.com",
+        messagingSenderId: "387834638903",
+        appId: "1:387834638903:web:35f3b3d1f952b4110cc5b2",
+        measurementId: "G-W9SBPZE667"
       };
+
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+      var db = firebase.firestore();
+      db
+        .collection("pizza-store")
+        .doc(orderId)
+        .onSnapshot(doc => {
+          const data = doc.data();
+          if(data && data.hasOwnProperty('status')) {
+            const status = data.status;
+            buttons.forEach(e => document.getElementById(e).classList.remove('btn-success'));
+            if(document.getElementById(status)) {
+              document.getElementById(status).classList.add('btn-success');
+            }
+          }
+        });
+
     </script>
   </body>
 </html>
