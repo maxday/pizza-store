@@ -28,10 +28,14 @@ public class OrdersService {
     }
 
     public Uni<JsonObject> receive(IncomingPubSubEvent pubSubEvent) {
+        LOG.info("in received method");
         String eventId = pubSubEvent.getMessage().getAttributes().getEventId();
+        LOG.info("eventId = " + eventId);
         String uuid = pubSubEvent.getMessage().getAttributes().getUuid();
+        LOG.info("uuid = " + uuid);
         String payload = pubSubEvent.getMessage().getData();
         LOG.info("Received eventId = " + eventId + " with uuid = " + uuid);
+        LOG.info("payload = " + payload);
         if(PizzaEvent.PIZZA_ORDER_REQUEST.getEvent().equals(eventId)) {
             return handlePizzaCreationRequest(uuid, payload);
         } else if (PizzaEvent.PIZZA_PREPARED_REQUEST.getEvent().equals(eventId)
