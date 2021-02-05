@@ -76,7 +76,7 @@
       firebase.analytics();
       var db = firebase.firestore();
       db
-        .collection("pizza-store")
+        .collection("pizzaStore")
         .doc(orderId)
         .onSnapshot(doc => {
           const data = doc.data();
