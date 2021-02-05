@@ -47,6 +47,13 @@ public class OrdersService {
         }
     }
 
+    private String stripRequestFromEvent(String eventId) {
+        if(null != eventId) {
+            return eventId.replaceAll("_REQUEST", "");
+        }
+        return eventId;
+    }
+
     private Uni<JsonObject> handlePizzaCreationRequest(String uuid, String name) {
         FirestoreDocument document = new FirestoreDocument(name, PizzaEvent.PIZZA_ORDERED.getEvent());
         return client.post(configuration.getApiPath() + configuration.getProjectName() + "/databases/(default)/documents/" + configuration.getDatabaseName() + "?documentId=" + uuid)
@@ -61,7 +68,7 @@ public class OrdersService {
     }
 
     private Uni<JsonObject> handlePizzaChangeStatusRequest(String uuid, String name, String eventId) {
-        FirestoreDocument document = new FirestoreDocument(name, eventId);
+        FirestoreDocument document = new FirestoreDocument(name, stripRequestFromEvent(eventId));
         return client.patch(configuration.getApiPath() + configuration.getProjectName() + "/databases/(default)/documents/" + configuration.getDatabaseName() + "/" + uuid)
                     .sendJson(document.toJson())
                     .map(resp -> {
