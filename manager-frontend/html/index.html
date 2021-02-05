@@ -48,14 +48,14 @@
     </main>
     <script>
         
-        const cloneLine = (pizza, parentElem) => {
+        const cloneLine = (uuid, pizza, parentElem) => {
           const clone = document.getElementById('toClone').cloneNode(true);
           clone.id = pizza.uuid;
           clone.classList.remove('hidden');
           clone.classList.add('generated');
-          clone.getElementsByClassName('pizzaOrderID')[0].innerText = `Order #${pizza.uuid}`;
+          clone.getElementsByClassName('pizzaOrderID')[0].innerText = `Order #${uuid}`;
           clone.getElementsByClassName('pizzaDetails')[0].innerText = pizza.name;
-          [...clone.getElementsByTagName('button')].forEach(button => button.setAttribute('data-uuid', pizza.uuid));
+          [...clone.getElementsByTagName('button')].forEach(button => button.setAttribute('data-uuid', uuid));
           parentElem.appendChild(clone);
         }
 
@@ -103,7 +103,7 @@
           .collection("pizzaStore")
           .onSnapshot(querySnapshot => {
             clearOrders();
-            querySnapshot.forEach(e => cloneLine(e.data(), document.getElementById('orderList')));
+            querySnapshot.forEach(e => cloneLine(e.id, e.data(), document.getElementById('orderList')));
           });
 
       
