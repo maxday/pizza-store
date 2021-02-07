@@ -39,7 +39,7 @@ public class OrdersService {
                 || PizzaEvent.PIZZA_LEFT_STORE_REQUEST.getEvent().equals(eventId)
                 || PizzaEvent.PIZZA_DELIVERED_REQUEST.getEvent().equals(eventId)) {
             LOG.info("Change status handler");
-            return handlePizzaChangeStatusRequest(uuid, payload, eventId);
+            return handlePizzaChangeStatusRequest(uuid, eventId);
         }
         else {
             LOG.info("Unknown event, skipping");
@@ -67,9 +67,9 @@ public class OrdersService {
                 });
     }
 
-    private Uni<JsonObject> handlePizzaChangeStatusRequest(String uuid, String name, String eventId) {
-        FirestoreDocument document = new FirestoreDocument(name, stripRequestFromEvent(eventId));
-        return client.patch(configuration.getApiPath() + configuration.getProjectName() + "/databases/(default)/documents/" + configuration.getDatabaseName() + "/" + uuid)
+    private Uni<JsonObject> handlePizzaChangeStatusRequest(String uuid, String eventId) {
+        FirestoreDocument document = new FirestoreDocument(null, stripRequestFromEvent(eventId));
+        return client.patch(configuration.getApiPath() + configuration.getProjectName() + "/databases/(default)/documents/" + configuration.getDatabaseName() + "/" + uuid + "?updateMask.fieldPaths=status")
                     .sendJson(document.toJson())
                     .map(resp -> {
                         if (resp.statusCode() == 200) {

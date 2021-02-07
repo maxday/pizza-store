@@ -13,7 +13,6 @@ public class FirestoreDocument {
     public FirestoreDocument(String name, String status) {
         this.fields = new HashMap<>();
         if(null != name) {
-            System.out.println(name);
             this.fields.put("name", new StringField(new String(Base64.getDecoder().decode(name))));
         }
         this.fields.put("status", new StringField(status));
