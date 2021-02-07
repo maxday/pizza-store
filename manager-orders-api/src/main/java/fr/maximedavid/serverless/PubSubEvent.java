@@ -9,6 +9,7 @@ public class PubSubEvent extends JsonObject {
         JsonArray messages = new JsonArray();
         this.put("messages", messages);
         JsonObject item = new JsonObject();
+        messages.add(item);
         JsonObject attributes = new JsonObject();
         attributes.put("uuid", uuid);
         attributes.put("eventId", eventId);
