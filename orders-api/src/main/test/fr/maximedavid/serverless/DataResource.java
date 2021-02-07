@@ -1,4 +1,4 @@
-package fr.maximedavid.serverless;
+    package fr.maximedavid.serverless;
 
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import org.testcontainers.containers.GenericContainer;

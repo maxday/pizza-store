@@ -15,6 +15,14 @@
     <link href="./css/offcanvas.css" rel="stylesheet">
   </head>
   <body class="bg-light">
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-firestore.js"></script>
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+        https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-analytics.js"></script>
+
     <main role="main" class="container">
       <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded box-shadow">
         <img class="mr-3" src="./pics/pizza-logo.svg" alt="" width="48" height="48">
@@ -40,31 +48,18 @@
     </main>
     <script>
         
-        const cloneLine = (pizza, parentElem) => {
+        const cloneLine = (uuid, pizza, parentElem) => {
           const clone = document.getElementById('toClone').cloneNode(true);
           clone.id = pizza.uuid;
           clone.classList.remove('hidden');
           clone.classList.add('generated');
-          clone.getElementsByClassName('pizzaOrderID')[0].innerText = `Order #${pizza.uuid}`;
+          clone.getElementsByClassName('pizzaOrderID')[0].innerText = `Order #${uuid}`;
           clone.getElementsByClassName('pizzaDetails')[0].innerText = pizza.name;
-          [...clone.getElementsByTagName('button')].forEach(button => button.setAttribute('data-uuid', pizza.uuid));
+          [...clone.getElementsByTagName('button')].forEach(button => button.setAttribute('data-uuid', uuid));
           parentElem.appendChild(clone);
         }
 
-        const fetchOrders = () => {
-          (async () => {
-            const response = await fetch('/orders', { 
-              method: 'GET', 
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            });
-            const result = response.status;
-            console.log(result);
-          })().catch(err => {
-            console.error(err);
-          });
-        }
+        
 
         const markAs = (elem, status) => {
           console.log('MARKING' + elem.getAttribute('data-uuid') + " AS " + status);
@@ -87,35 +82,29 @@
           });
         }
 
-        const uuidv4 = () => {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-            // thanks ! https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid
-        }
-
-        const source = new EventSource(`/events/${uuidv4()}`);
-        source.onopen = event => {
-          fetchOrders();
-        };
-
         const clearOrders = () => {
           [...document.getElementsByClassName('generated')].forEach(e => e.remove());
         }
 
-        source.onmessage = event => {
-          console.log(event);
-          console.log(event.data);
-          const data = JSON.parse(event.data);
-          console.log(data);
-          const extraData = data.extraData;
-          console.log(extraData);
-          if(Array.isArray(extraData)) {
-            clearOrders();
-            extraData.forEach(e => cloneLine(e, document.getElementById('orderList')));
-          }
+        const firebaseConfig = {
+          apiKey: "AIzaSyBVPyPPEKxqvcSzis5hQuwcNxY-1tkfzso",
+          authDomain: "techday-pizza-store-demo.firebaseapp.com",
+          projectId: "techday-pizza-store-demo",
+          storageBucket: "techday-pizza-store-demo.appspot.com",
+          messagingSenderId: "387834638903",
+          appId: "1:387834638903:web:35f3b3d1f952b4110cc5b2",
+          measurementId: "G-W9SBPZE667"
         };
+
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+        var db = firebase.firestore();
+        db
+          .collection("pizzaStore")
+          .onSnapshot(querySnapshot => {
+            clearOrders();
+            querySnapshot.forEach(e => cloneLine(e.id, e.data(), document.getElementById('orderList')));
+          });
 
       
     </script>

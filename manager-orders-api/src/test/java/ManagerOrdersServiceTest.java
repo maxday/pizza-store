@@ -26,13 +26,4 @@ public class ManagerOrdersServiceTest {
                 .then().statusCode(204);
     }
 
-    @Test
-    public void testListOrders() {
-        when(pubSubService.publishMessage(null, null)).thenReturn(Uni.createFrom().item(new JsonObject()));
-        given().when()
-                .contentType(ContentType.JSON)
-                .get("/orders")
-                .then().statusCode(204);
-    }
-
 }

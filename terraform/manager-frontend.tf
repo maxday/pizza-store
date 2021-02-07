@@ -8,10 +8,6 @@ resource "google_cloud_run_service" "manager-frontend" {
       containers {
         image = "gcr.io/${var.project_id}/manager-frontend"
         env {
-          name = "EVENTS_ENDPOINT"
-          value = google_cloud_run_service.manager-sse-handler.status[0].url
-        }
-        env {
           name = "ORDERS_ENDPOINT"
           value = google_cloud_run_service.manager-orders-api.status[0].url
         }

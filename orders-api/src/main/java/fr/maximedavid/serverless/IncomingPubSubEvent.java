@@ -1,7 +1,5 @@
 package fr.maximedavid.serverless;
 
-import io.vertx.core.json.JsonObject;
-
 public class IncomingPubSubEvent {
 
     private Message message;

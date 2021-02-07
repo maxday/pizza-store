@@ -12,10 +12,6 @@ resource "google_cloud_run_service" "client-frontend" {
           }
         }
         env {
-          name = "EVENTS_ENDPOINT"
-          value = google_cloud_run_service.client-sse-handler.status[0].url
-        }
-        env {
           name = "ORDERS_ENDPOINT"
           value = google_cloud_run_service.client-orders-api.status[0].url
         }
