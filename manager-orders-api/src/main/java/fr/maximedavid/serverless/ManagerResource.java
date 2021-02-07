@@ -20,8 +20,4 @@ public class ManagerResource {
         return managerService.setStatus(pizza);
     }
 
-    @GET
-    public Uni<JsonObject> listOrders() {
-        return managerService.listOrders();
-    }
 }

@@ -21,17 +21,13 @@ public class ManagerService {
     }
 
     public Uni<JsonObject> setStatus(Pizza pizza) {
-        return publishMessage(pizza.getUuid(), pizza.getEventId(), false);
+        return publishMessage(pizza.getUuid(), pizza.getEventId());
     }
 
-    public Uni<JsonObject> listOrders() {
-        return publishMessage(null, PizzaEvent.PIZZA_ORDER_LIST_REQUEST.getEvent(), true);
-    }
-
-    public Uni<JsonObject> publishMessage(String uuid, String eventId, boolean isManager) {
+    public Uni<JsonObject> publishMessage(String uuid, String eventId) {
         PubSubEvent pubSubEvent = new PubSubEvent(uuid, eventId);
         LOG.info("Publishing : " + pubSubEvent.toString());
-        String topicUrl = isManager ? configuration.getPubsubManagerTopicPublishUrl() : configuration.getPubsubTopicPublishUrl();
+        String topicUrl = configuration.getPubsubTopicPublishUrl();
         return this.pubSubService.publishMessage(pubSubEvent, topicUrl);
     }
 }

@@ -39,26 +39,6 @@ resource "google_cloud_run_service_iam_binding" "auth-client-orders-api" {
   ]
 }
 
-resource "google_cloud_run_service_iam_binding" "auth-client-sse-handler" {
-  location    = google_cloud_run_service.client-sse-handler.location
-  project     = google_cloud_run_service.client-sse-handler.project
-  service     = google_cloud_run_service.client-sse-handler.name
-  role = "roles/run.invoker"
-  members = [
-    "allUsers",
-  ]
-}
-
-resource "google_cloud_run_service_iam_binding" "auth-manager-sse-handler" {
-  location    = google_cloud_run_service.manager-sse-handler.location
-  project     = google_cloud_run_service.manager-sse-handler.project
-  service     = google_cloud_run_service.manager-sse-handler.name
-  role = "roles/run.invoker"
-  members = [
-    "allUsers",
-  ]
-}
-
 resource "google_cloud_run_service_iam_binding" "auth-manager-orders-api" {
   location    = google_cloud_run_service.manager-orders-api.location
   project     = google_cloud_run_service.manager-orders-api.project

@@ -1,9 +1,7 @@
 package fr.maximedavid.serverless;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
@@ -11,7 +9,6 @@ import io.quarkus.jackson.ObjectMapperCustomizer;
 import org.jboss.logging.Logger;
 
 import javax.inject.Singleton;
-import java.io.IOException;
 
 @Singleton
 public class RegisterCustomModuleCustomizer implements ObjectMapperCustomizer {
@@ -21,17 +18,15 @@ public class RegisterCustomModuleCustomizer implements ObjectMapperCustomizer {
 
     public void customize(ObjectMapper mapper) {
         mapper.addHandler(new DeserializationProblemHandler() {
-
             @Override
-            public boolean handleUnknownProperty(DeserializationContext ctxt,
+            public boolean handleUnknownProperty(DeserializationContext context,
                                                  JsonParser jp, JsonDeserializer<?> deserializer,
-                                                 Object beanOrClass, String propertyName)
-                    throws IOException, JsonProcessingException {
+                                                 Object beanOrClass, String propertyName) {
 
                 String unknownField = String.format("Ignoring unknown property %s while deserializing %s", propertyName, beanOrClass);
                 LOG.info(getClass().getSimpleName() +  unknownField);
                 return true;
             }
         });
-        }
+    }
 }

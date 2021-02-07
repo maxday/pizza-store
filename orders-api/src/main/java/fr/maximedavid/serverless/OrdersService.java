@@ -51,7 +51,7 @@ public class OrdersService {
         if(null != eventId) {
             return eventId.replaceAll("_REQUEST", "");
         }
-        return eventId;
+        return "";
     }
 
     private Uni<JsonObject> handlePizzaCreationRequest(String uuid, String name) {
